@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schedule a Benefits Consultation</title>
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+<script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+<style>
+:root {
+  --primary: #000000;
+  --accent: #ffffff;
+  --bg: #f0f4f8;
+  --white: #fff;
+  --gray: #6b7280;
+  --light-gray: #e5e7eb;
+  --green: #10b981;
+  --red: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 24px 12px 48px; }
+
+.page-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.brand-logo { width: 48px; height: 48px; border-radius: 10px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; color: var(--primary); overflow: hidden; flex-shrink: 0; }
+.brand-logo img { width: 100%; height: 100%; object-fit: cover; }
+.brand-text h1 { font-size: 20px; font-weight: 800; color: var(--primary); }
+.brand-text p { font-size: 13px; color: var(--gray); }
+
+.chat-box { width: 100%; max-width: 500px; background: white; border-radius: 18px; box-shadow: 0 6px 32px rgba(0,0,0,0.12); overflow: hidden; }
+.chat-head { background: var(--primary); padding: 16px 20px; color: white; display: flex; align-items: center; gap: 12px; }
+.chat-av { width: 42px; height: 42px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: var(--primary); flex-shrink: 0; overflow: hidden; }
+.chat-av img { width: 100%; height: 100%; object-fit: cover; }
+.chat-head-info h3 { font-size: 15px; font-weight: 700; }
+.chat-head-info p { font-size: 12px; opacity: 0.8; }
+.dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; display: inline-block; margin-right: 4px; }
+
+.chat-msgs { height: 420px; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; background: #f8f9fb; }
+.msg { max-width: 84%; }
+.msg.bot { align-self: flex-start; }
+.msg.user { align-self: flex-end; }
+.bubble { padding: 11px 15px; border-radius: 14px; font-size: 14px; line-height: 1.55; }
+.msg.bot .bubble { background: white; border: 1px solid var(--light-gray); border-radius: 4px 14px 14px 14px; color: #1f2937; }
+.msg.user .bubble { background: var(--primary); color: white; border-radius: 14px 4px 14px 14px; }
+.msg-t { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+.msg.user .msg-t { text-align: right; }
+
+.typing { display: flex; gap: 4px; padding: 11px 15px; background: white; border: 1px solid var(--light-gray); border-radius: 4px 14px 14px 14px; width: fit-content; align-items: center; }
+.td { width: 7px; height: 7px; background: #9ca3af; border-radius: 50%; animation: td 1.2s infinite; }
+.td:nth-child(2){animation-delay:.2s} .td:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+
+.opts { padding: 12px 18px; display: flex; flex-direction: column; gap: 7px; background: white; border-top: 1px solid var(--light-gray); }
+.opt { padding: 10px 15px; background: white; border: 2px solid var(--primary); border-radius: 9px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--primary); text-align: left; transition: all 0.18s; }
+.opt:hover { background: var(--primary); color: white; }
+
+/* Multi-select checkboxes */
+.multi-wrap { padding: 12px 18px; background: white; border-top: 1px solid var(--light-gray); display: flex; flex-direction: column; gap: 0; }
+.multi-hint { font-size: 11px; color: var(--gray); margin-bottom: 8px; font-style: italic; }
+.multi-opt { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 2px solid var(--light-gray); border-radius: 9px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--primary); transition: all 0.15s; margin-bottom: 6px; user-select: none; }
+.multi-opt:hover { border-color: var(--primary); background: #eff6ff; }
+.multi-opt.checked { border-color: var(--primary); background: var(--primary); color: white; }
+.multi-opt input[type=checkbox] { display: none; }
+.multi-check { width: 18px; height: 18px; border: 2px solid currentColor; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; }
+.multi-confirm { margin-top: 4px; padding: 11px; background: var(--accent); border: none; border-radius: 9px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--primary); width: 100%; }
+
+.inp-row { padding: 12px 18px; background: white; border-top: 1px solid var(--light-gray); display: flex; gap: 8px; }
+.inp { flex: 1; padding: 10px 14px; border: 2px solid var(--light-gray); border-radius: 9px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.inp:focus { border-color: var(--primary); }
+.send-btn { background: var(--primary); color: white; border: none; border-radius: 9px; padding: 10px 16px; cursor: pointer; font-weight: 700; font-size: 13px; }
+
+.appt-section { background: white; border-top: 1px solid var(--light-gray); padding: 16px 18px; }
+.appt-section h4 { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 12px; }
+.appt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.appt-card { border: 2px solid var(--light-gray); border-radius: 12px; padding: 16px; cursor: pointer; text-align: center; transition: all 0.2s; }
+.appt-card:hover,.appt-card.sel { border-color: var(--primary); background: #eff6ff; }
+.appt-icon { font-size: 28px; margin-bottom: 6px; }
+.appt-lbl { font-size: 13px; font-weight: 700; color: var(--primary); }
+.appt-sub { font-size: 11px; color: var(--gray); margin-top: 3px; }
+.appt-skip { text-align: center; margin-top: 10px; }
+.appt-skip button { background: none; border: none; color: #9ca3af; font-size: 12px; cursor: pointer; text-decoration: underline; }
+
+
+.consent-section { margin: 0 18px 14px; border: 2px solid var(--accent); border-radius: 12px; padding: 18px; background: white; }
+.consent-section h4 { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+.consent-section p { font-size: 12px; color: var(--gray); margin-bottom: 12px; line-height: 1.55; }
+.sig-box { border: 1px solid var(--light-gray); border-radius: 8px; background: #fafafa; margin-bottom: 10px; }
+.sig-box canvas { display: block; width: 100%; cursor: crosshair; touch-action: none; }
+.consent-btns { display: flex; gap: 8px; }
+.btn-clr { padding: 9px 16px; background: white; border: 2px solid var(--light-gray); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--gray); font-weight: 600; }
+.btn-submit { padding: 9px 16px; background: var(--accent); border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--primary); flex: 1; }
+
+.done-screen { display: none; padding: 40px 24px; text-align: center; }
+.done-check { width: 64px; height: 64px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 16px; }
+.done-screen h2 { font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+.done-screen p { font-size: 14px; color: var(--gray); line-height: 1.6; margin-bottom: 20px; }
+.btn-calendly { display: inline-block; padding: 12px 28px; background: var(--primary); color: white; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px; }
+
+.footer { margin-top: 20px; font-size: 11px; color: #9ca3af; text-align: center; }
+
+.notif { position: fixed; top: 18px; right: 18px; background: var(--primary); color: white; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; z-index: 999; box-shadow: 0 4px 16px rgba(0,0,0,0.18); transform: translateX(130%); transition: transform 0.3s; }
+.notif.show { transform: translateX(0); }
+.notif.err { background: var(--red); }
+
+@media(max-width:480px){
+  .appt-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-brand">
+  <div class="brand-logo" id="pageLogo"><span id="pageInitials">C1</span></div>
+  <div class="brand-text">
+    <h1 id="pageAgency">Channel One Strategies</h1>
+    <p id="pageTagline">Group Benefits &amp; Insurance Advisor</p>
+  </div>
+</div>
+
+<div class="chat-box" id="chatBox">
+  <div class="chat-head">
+    <div class="chat-av" id="chatAv"><span id="chatAvText">C1</span></div>
+    <div class="chat-head-info">
+      <h3 id="chatName">Channel One Strategies</h3>
+      <p><span class="dot"></span><span id="chatOnline">Benefits Advisor — Online Now</span></p>
+    </div>
+  </div>
+  <div class="chat-msgs" id="msgs"></div>
+  <div id="optsEl" class="opts" style="display:none;"></div>
+  <div id="multiEl" class="multi-wrap" style="display:none;"></div>
+  <div id="apptEl" style="display:none;">
+    <div class="appt-section">
+      <h4>Schedule your virtual consultation</h4>
+      <div style="display:flex; justify-content:center; padding:8px 0;">
+        <div class="appt-card" id="cardVirtual" onclick="pickAppt('virtual')" style="max-width:240px; width:100%;">
+          <div class="appt-icon">&#128187;</div>
+          <div class="appt-lbl">Book a Virtual Meeting</div>
+          <div class="appt-sub">Video call via Zoom or Google Meet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Calendly launched confirmation -->
+  <div id="calendlyPanel" style="display:none; background:white; border-top:1px solid var(--light-gray); padding:18px;">
+    <div style="border:2px solid var(--primary); border-radius:12px; padding:16px; text-align:center;">
+      <div style="font-size:32px; margin-bottom:8px;">&#128197;</div>
+      <p style="font-weight:700; color:var(--primary); margin-bottom:6px;">Complete your booking in the window that just opened</p>
+      <p style="font-size:12px; color:#6b7280; margin-bottom:14px;" id="calendlyStatusMsg">&#9203; Waiting for your Calendly booking to be confirmed...</p>
+      <button onclick="afterBooking()" id="afterBookingBtn" disabled style="padding:11px 24px; background:#d1d5db; color:#9ca3af; border:none; border-radius:8px; cursor:not-allowed; font-weight:700; font-size:13px;">Booking confirmed — continue</button>
+    </div>
+  </div>
+
+  <div id="consentEl" style="display:none;">
+    <div class="consent-section">
+      <h4>Consultation Authorization</h4>
+      <p>By signing, you confirm you've requested a benefits consultation and consent to be contacted by <span id="consentName">Channel One Strategies</span> to discuss group insurance and benefits options for your company.</p>
+      <div class="sig-box"><canvas id="sigCanvas" height="110"></canvas></div>
+      <div class="consent-btns">
+        <button class="btn-clr" onclick="clearSig()">Clear</button>
+        <button class="btn-submit" onclick="submitConsent()">Sign &amp; Submit Request</button>
+      </div>
+    </div>
+  </div>
+  <div class="inp-row" id="inpRow" style="display:none;">
+    <input class="inp" id="inpField" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')send()">
+    <button class="send-btn" onclick="send()">Send</button>
+  </div>
+  <div class="done-screen" id="doneScreen">
+    <div class="done-check">&#10003;</div>
+    <h2 id="doneName">You're all set!</h2>
+    <p id="doneMsg">Your consultation request has been submitted. We'll be in touch shortly to discuss benefits options for your company.</p>
+    <div id="doneAgentCard" style="margin-top:18px;border:2px solid var(--light-gray);border-radius:12px;padding:16px 18px;text-align:left;width:100%;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:#9ca3af;margin-bottom:10px;">Your Advisor</p>
+      <p style="font-size:16px;font-weight:800;color:var(--primary);margin-bottom:6px;" id="doneAgentName">Joe</p>
+      <p style="font-size:13px;color:#374151;margin-bottom:4px;display:none;" id="doneAgentPhone"></p>
+      <p style="font-size:13px;color:#374151;display:none;" id="doneAgentEmail"></p>
+    </div>
+    <a id="doneCalendly" href="#" target="_blank" class="btn-calendly">Book Your Appointment</a>
+  </div>
+</div>
+
+<div class="footer">Your information is kept private and will only be used to contact you about benefits options.</div>
+<div class="notif" id="notif"></div>
+
+<script>
+// ── CONFIG (loaded from admin settings) ───────────────────────────────
+var API_BASE = 'https://channel-one-backend.vercel.app';
+var SETTINGS_KEY = 'bb_settings';
+
+function getSettings() {
+  try {
+    return Object.assign({
+      agency: 'Channel One Strategies',
+      agent: 'Joe',
+      agentPhone: '(217) 722-1385',
+      agentEmail: 'joe@channelonestrategies.com',
+      tagline: 'Group Benefits & Insurance Advisor',
+      colorPrimary: '#000000', colorAccent: '#ffffff', logo: '',
+      calendlyVirtual: 'https://calendly.com/joe-channelonestrategies/free-insurance-consultation',
+    }, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'));
+  } catch(e) { return {}; }
+}
+
+function applyBranding() {
+  var s = getSettings();
+  document.documentElement.style.setProperty('--primary', s.colorPrimary || '#1A3A5C');
+  document.documentElement.style.setProperty('--accent', s.colorAccent || '#C8972B');
+  var initials = (s.agency||'BB').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();
+  document.getElementById('pageInitials').textContent = initials;
+  document.getElementById('chatAvText').textContent = initials;
+  document.getElementById('pageAgency').textContent = s.agency || 'Channel One Strategies';
+  document.getElementById('pageTagline').textContent = s.tagline || 'Group Benefits & Insurance Advisor';
+  document.getElementById('chatName').textContent = s.agency || 'Channel One Strategies';
+  document.getElementById('chatOnline').textContent = (s.agent||'Advisor') + ' — Online Now';
+  document.getElementById('consentName').textContent = s.agency || 'Channel One Strategies';
+  if (s.location) document.getElementById('inPersonSub').textContent = s.location;
+  if (s.logo) {
+    document.getElementById('pageLogo').innerHTML = '<img src="'+s.logo+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">';
+    document.getElementById('chatAv').innerHTML = '<img src="'+s.logo+'" style="width:100%;height:100%;object-fit:cover;">';
+  }
+}
+
+// ── CHAT STATE ────────────────────────────────────────────────────────
+var step = 0;
+var lead = {};
+var ichra = false;
+var flow = [];
+
+function buildFlow() {
+  var s = getSettings();
+  return [
+    { id:'intro',
+      bot: "Hi! I'm " + (s.agent||'your advisor') + " with " + (s.agency||'our agency') + ". We've learned how to help employers of all company sizes offer <strong>financially predictable, cost-controlled benefits</strong> — while giving employees access to <strong>personalized, higher quality, more affordable coverage</strong>. Can I ask you a few quick questions to see if we're a good fit for your company?",
+      options: ["Let's get started! →"] },
+    { id:'firstName', key:'firstName',
+      bot: "Great! What's your first name?", input: true },
+    { id:'company', key:'company',
+      bot: function(d){ return "Nice to meet you, "+d.firstName+"! What company are you with?"; },
+      input: true, placeholder: 'Company name' },
+    { id:'role', key:'role',
+      bot: function(d){ return "What is your role at "+d.company+"?"; },
+      options: ["Business Owner / CEO","HR Director / Manager","Office Manager","CFO / Controller","Benefits Administrator","Other Decision Maker"] },
+    { id:'employees', key:'employees',
+      bot: "How many W-2 employees does your company have?",
+      options: ["1-5 employees","6-25 employees","26-50 employees","51-100 employees","100+ employees"] },
+    { id:'currentBenefits', key:'currentBenefits',
+      bot: "Do you currently offer any benefits to your employees?",
+      options: ["No benefits currently","Basic benefits only","Some benefits — looking to expand","Fully covered — exploring options"] },
+    { id:'interest', key:'interest',
+      bot: "What benefits are you most interested in? Select all that apply.",
+      multiSelect: true,
+      options: ["Life Insurance","Health / Medical","Dental & Vision","Supplemental / Voluntary Benefits","ICHRA (Individual Coverage HRA)","Full Benefits Package"] },
+    // ICHRA branch
+    { id:'ichra_aware', key:'ichra_aware', ichraBranch: true,
+      bot: "Are you familiar with ICHRA — where your company reimburses employees tax-free for their own individual health plans instead of managing a group plan?",
+      options: ["Yes, I understand it well","Heard of it but want to learn more","No, this is new to me"] },
+    { id:'ichra_replace', key:'ichra_replace', ichraBranch: true,
+      bot: "Do you currently have a group health plan you'd want to replace with ICHRA, or would this be brand new coverage?",
+      options: ["Replace existing group plan","Brand new — no current coverage","Add ICHRA alongside existing plan"] },
+    { id:'ichra_budget', key:'ichra_budget', ichraBranch: true,
+      bot: "What monthly reimbursement per employee are you considering? You set the amount and employees choose their own plan.",
+      options: ["Under $200/employee/mo","$200–$400/employee/mo","$400–$700/employee/mo","$700+/employee/mo","Not sure yet"] },
+    { id:'ichra_subsidies', key:'ichra_subsidies', ichraBranch: true,
+      bot: "Do any of your employees currently receive ACA Marketplace subsidies? This is important — ICHRA enrollment may affect their subsidy eligibility.",
+      options: ["Yes, some do","No, they don't","I'm not sure"] },
+    // Shared
+    { id:'timeline', key:'timeline',
+      bot: "What's your timeline for getting benefits in place?",
+      options: ["ASAP — within 30 days","Within 3 months","Within 6 months","Just exploring for now"] },
+    { id:'phone', key:'phone',
+      bot: "What's the best phone number to reach you?",
+      input: true, inputType: 'tel', placeholder: '(555) 555-5555' },
+    { id:'email', key:'email',
+      bot: "And your business email so we can send over options?",
+      input: true, inputType: 'email', placeholder: 'you@company.com', fireAPI: true },
+    { id:'appt', key: null,
+      bot: function(d){ return "Almost done, "+d.firstName+"! Let's get a virtual meeting on the calendar to go over your benefits options."; },
+      appt: true },
+    { id:'consent', key: null,
+      bot: function(d){ return "Last step — please sign below to confirm you've requested this consultation with " + getSettings().agency + "."; },
+      consent: true }
+  ];
+}
+
+function activeFlow() {
+  return buildFlow().filter(function(s){ return ichra || !s.ichraBranch; });
+}
+
+// ── ENGINE ────────────────────────────────────────────────────────────
+function start() {
+  flow = activeFlow();
+  step = 0;
+  showStep(flow[0]);
+}
+
+function showStep(s) {
+  var msg = typeof s.bot === 'function' ? s.bot(lead) : s.bot;
+  botMsg(msg);
+  hide('optsEl'); hide('multiEl'); hide('inpRow'); hide('apptEl'); hide('consentEl');
+  if (s.appt)        { setTimeout(function(){ show('apptEl'); }, 500); }
+  else if (s.consent){ setTimeout(function(){ show('consentEl'); setTimeout(initSig, 80); }, 500); }
+  else if (s.multiSelect) { setTimeout(function(){ showMulti(s.options); }, 500); }
+  else if (s.options){ setTimeout(function(){ showOpts(s.options); }, 500); }
+  else if (s.input)  { setTimeout(function(){ showInp(s.inputType||'text', s.placeholder||'Type your answer...'); }, 500); }
+}
+
+function botMsg(html) {
+  var d = document.createElement('div'); d.className = 'msg bot';
+  d.innerHTML = '<div class="bubble">'+html+'</div><div class="msg-t">'+tnow()+'</div>';
+  push(d);
+}
+function userMsg(t) {
+  var d = document.createElement('div'); d.className = 'msg user';
+  d.innerHTML = '<div class="bubble">'+t+'</div><div class="msg-t">'+tnow()+'</div>';
+  push(d);
+}
+function push(el) { var b = document.getElementById('msgs'); b.appendChild(el); b.scrollTop = b.scrollHeight; }
+function showTyping() { var d = document.createElement('div'); d.className='msg bot'; d.id='td'; d.innerHTML='<div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div>'; push(d); }
+function rmTyping() { var t=document.getElementById('td'); if(t) t.remove(); }
+function showOpts(opts) {
+  var el = document.getElementById('optsEl'); el.style.display='flex';
+  el.innerHTML = opts.map(function(o){ return '<button class="opt" onclick="pick(this.textContent)">'+o+'</button>'; }).join('');
+}
+function showMulti(opts) {
+  var el = document.getElementById('multiEl'); el.style.display='flex';
+  el.innerHTML = '<div class="multi-hint">Select all that apply</div>' +
+    opts.map(function(o, i){
+      return '<label class="multi-opt" id="mopt'+i+'" onclick="toggleMulti('+i+',this)">' +
+        '<span class="multi-check" id="mchk'+i+'"></span>' +
+        '<span>'+o+'</span>' +
+        '</label>';
+    }).join('') +
+    '<button class="multi-confirm" onclick="confirmMulti()">Continue →</button>';
+}
+var multiSelected = [];
+function toggleMulti(i, el) {
+  var idx = multiSelected.indexOf(el.querySelector('span:last-child').textContent);
+  if (idx >= 0) {
+    multiSelected.splice(idx, 1);
+    el.classList.remove('checked');
+    el.querySelector('.multi-check').textContent = '';
+  } else {
+    multiSelected.push(el.querySelector('span:last-child').textContent);
+    el.classList.add('checked');
+    el.querySelector('.multi-check').textContent = '✓';
+  }
+}
+function confirmMulti() {
+  if (!multiSelected.length) { notif('Please select at least one option.', 'err'); return; }
+  hide('multiEl');
+  var val = multiSelected.join(', ');
+  multiSelected = [];
+  userMsg(val);
+  var s = flow[step];
+  if (s.key) lead[s.key] = val;
+  if (s.key === 'interest' && val.indexOf('ICHRA') >= 0) {
+    ichra = true;
+    flow = activeFlow();
+    for (var i=0;i<flow.length;i++) { if(flow[i].id==='interest'){step=i;break;} }
+  }
+  next();
+}
+function showInp(type, ph) {
+  var r=document.getElementById('inpRow'), i=document.getElementById('inpField');
+  r.style.display='flex'; i.type=type; i.placeholder=ph; i.value='';
+  // Phone auto-format: (555) 555-5555
+  if (type === 'tel') {
+    i.oninput = function() {
+      var digits = this.value.replace(/\D/g,'').substring(0,10);
+      var fmt = '';
+      if (digits.length > 0) fmt = '(' + digits.substring(0,3);
+      if (digits.length >= 4) fmt += ') ' + digits.substring(3,6);
+      if (digits.length >= 7) fmt += '-' + digits.substring(6,10);
+      this.value = fmt;
+    };
+  } else {
+    i.oninput = null;
+  }
+  setTimeout(function(){ i.focus(); }, 100);
+}
+function show(id) { document.getElementById(id).style.display='block'; }
+function hide(id) { document.getElementById(id).style.display='none'; }
+
+function pick(val) {
+  hide('optsEl'); userMsg(val);
+  var s = flow[step];
+  if (s.key) lead[s.key] = val;
+  if (s.key === 'interest' && val.indexOf('ICHRA') >= 0) {
+    ichra = true;
+    flow = activeFlow();
+    for (var i=0;i<flow.length;i++) { if(flow[i].id==='interest'){step=i;break;} }
+  }
+  next();
+}
+
+function send() {
+  var i=document.getElementById('inpField'), v=i.value.trim(); if(!v) return;
+  hide('inpRow'); userMsg(v);
+  var s=flow[step];
+  if(s.key) lead[s.key]=v;
+  if(s.fireAPI) capture(false);
+  next();
+}
+
+function next() {
+  step++;
+  if (step >= flow.length) return;
+  showTyping();
+  setTimeout(function(){ rmTyping(); showStep(flow[step]); }, 900+Math.random()*500);
+}
+
+// ── APPOINTMENT ───────────────────────────────────────────────────────
+var calendlyBooked = false;
+
+function pickAppt(type) {
+  var s = getSettings();
+  var url = s.calendlyVirtual || 'https://calendly.com/joe-channelonestrategies/free-insurance-consultation';
+  lead.apptType = 'Virtual Meeting';
+  document.getElementById('cardVirtual').classList.add('sel');
+  userMsg('📹 Book Virtual Meeting');
+  hide('apptEl');
+
+  // Open Calendly popup (official widget — works from local files and hosted pages)
+  var prefill = { name: lead.firstName||'', email: lead.email||'' };
+  if (typeof Calendly !== 'undefined') {
+    Calendly.initPopupWidget({ url: url, prefill: prefill });
+  } else {
+    // Fallback if Calendly script didn't load
+    window.open(url + '?name='+encodeURIComponent(lead.firstName||'')+'&email='+encodeURIComponent(lead.email||''), '_blank');
+  }
+
+  document.getElementById('calendlyPanel').style.display = 'block';
+  saveApptLocal(lead, 'virtual');
+}
+
+function afterBooking() {
+  document.getElementById('calendlyPanel').style.display = 'none';
+  userMsg('✅ Appointment booked!');
+  showTyping();
+  setTimeout(function(){
+    rmTyping();
+    botMsg('Perfect — your appointment is confirmed, '+(lead.firstName||'there')+'! One last step before we finish.');
+    setTimeout(function(){ next(); }, 700);
+  }, 600);
+}
+
+// Listen for Calendly popup booking confirmation
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.event && e.data.event === 'calendly.event_scheduled') {
+    lead.apptBooked = true;
+    // Unlock the continue button
+    var btn = document.getElementById('afterBookingBtn');
+    var msg = document.getElementById('calendlyStatusMsg');
+    if (btn) {
+      btn.disabled = false;
+      btn.style.background = 'var(--primary)';
+      btn.style.color = 'white';
+      btn.style.cursor = 'pointer';
+    }
+    if (msg) { msg.textContent = '✅ Booking confirmed! Click the button below to continue.'; msg.style.color = '#059669'; }
+  }
+});
+
+// ── SIGNATURE ─────────────────────────────────────────────────────────
+var sc, sx, sd=false, sh=false;
+function initSig() {
+  sc = document.getElementById('sigCanvas');
+  if (!sc) return;
+  sx = sc.getContext('2d');
+  var w = sc.parentElement.clientWidth || sc.parentElement.offsetWidth || 460;
+  sc.width = w; sc.height = 110;
+  sx.clearRect(0, 0, sc.width, sc.height);
+  sh = false;
+  sx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()||'#1A3A5C';
+  sx.lineWidth = 2.5; sx.lineCap = 'round';
+  function gp(e){ var r=sc.getBoundingClientRect(),s=e.touches?e.touches[0]:e; return [s.clientX-r.left,s.clientY-r.top]; }
+  sc.addEventListener('mousedown',function(e){sd=true;sh=true;var p=gp(e);sx.beginPath();sx.moveTo(p[0],p[1]);});
+  sc.addEventListener('mousemove',function(e){if(!sd)return;var p=gp(e);sx.lineTo(p[0],p[1]);sx.stroke();});
+  sc.addEventListener('mouseup',function(){sd=false;});
+  sc.addEventListener('mouseleave',function(){sd=false;});
+  sc.addEventListener('touchstart',function(e){e.preventDefault();sd=true;sh=true;var p=gp(e);sx.beginPath();sx.moveTo(p[0],p[1]);},{passive:false});
+  sc.addEventListener('touchmove',function(e){e.preventDefault();if(!sd)return;var p=gp(e);sx.lineTo(p[0],p[1]);sx.stroke();},{passive:false});
+  sc.addEventListener('touchend',function(){sd=false;});
+}
+function clearSig() { if(sx){sx.clearRect(0,0,sc.width,sc.height);sh=false;} }
+
+async function submitConsent() {
+  if (!sh) { notif('Please sign before submitting.','err'); return; }
+  hide('consentEl');
+  lead.soaSigned = true; lead.soaTimestamp = new Date().toISOString();
+  await capture(true);
+  saveLeadLocal(lead, 'signed');
+  showDone();
+}
+
+function showDone() {
+  var s = getSettings();
+  document.getElementById('chatBox').querySelector('.chat-msgs').style.display = 'none';
+  hide('optsEl'); hide('multiEl'); hide('inpRow'); hide('apptEl'); hide('consentEl');
+  document.getElementById('doneName').textContent = "You're all set, " + (lead.firstName||'there') + "!";
+  document.getElementById('doneMsg').textContent = "Your consultation request has been submitted to " + (s.agency||'our team') + ". We'll be in touch shortly to discuss the best benefits options for " + (lead.company||'your company') + ".";
+  // Agent contact card
+  document.getElementById('doneAgentName').textContent = s.agent || 'Your Advisor';
+  var ph = document.getElementById('doneAgentPhone');
+  var em = document.getElementById('doneAgentEmail');
+  if (s.agentPhone) { ph.textContent = '📞 ' + s.agentPhone; ph.style.display = 'block'; }
+  if (s.agentEmail) { em.textContent = '✉️ ' + s.agentEmail; em.style.display = 'block'; }
+  // Hide Calendly button — appointment already booked during flow
+  document.getElementById('doneCalendly').style.display='none';
+  document.getElementById('doneScreen').style.display = 'block';
+}
+
+// ── API ────────────────────────────────────────────────────────────────
+async function capture(soaSigned) {
+  var priority = 'cold';
+  if (lead.timeline&&lead.timeline.indexOf('ASAP')>=0) priority='hot';
+  else if (lead.timeline&&lead.timeline.indexOf('3 months')>=0) priority='warm';
+  if (ichra) priority='hot';
+  var notes = [
+    lead.ichra_aware     ? 'ICHRA Awareness: '+lead.ichra_aware    : null,
+    lead.ichra_replace   ? 'Group Plan: '+lead.ichra_replace       : null,
+    lead.ichra_budget    ? 'ICHRA Budget: '+lead.ichra_budget      : null,
+    lead.ichra_subsidies ? 'Subsidies: '+lead.ichra_subsidies      : null,
+  ].filter(Boolean).join(' | ');
+  var payload = {
+    name: (lead.firstName||'Unknown').trim(),
+    email: lead.email||'', phone: lead.phone||'',
+    interest: lead.interest||'Group Benefits',
+    budget: lead.employees||'Unknown',
+    readiness: lead.timeline||'Unknown',
+    priority: priority, soaSigned: soaSigned||false,
+    soaTimestamp: lead.soaTimestamp||'',
+    company: lead.company||'', role: lead.role||'',
+    employees: lead.employees||'', currentBenefits: lead.currentBenefits||'',
+    apptType: lead.apptType||'', ichra: ichra, ichraNotes: notes,
+    source: 'BenefitsBot Widget'
+  };
+  try {
+    var r = await fetch(API_BASE+'/api/capture-lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var d = await r.json();
+    if (r.ok) {
+      lead.hubspotId = d.hubspot;
+      if(!soaSigned) saveLeadLocal(lead,priority==='hot'?'hot':'new');
+      if(!soaSigned) notif('✅ Info received — your advisor has been notified!');
+    } else {
+      notif('⚠️ Submission issue: ' + (d.error||'Unknown error'), 'err');
+      saveLeadLocal(lead,'new');
+    }
+  } catch(e) {
+    notif('⚠️ Could not reach server. Saved locally.', 'err');
+    saveLeadLocal(lead,'new');
+  }
+}
+
+// ── LOCAL STORAGE (shared with admin dashboard via same keys) ─────────
+function saveLeadLocal(d, status) {
+  var all = JSON.parse(localStorage.getItem('bb_leads')||'[]');
+  var idx = all.findIndex(function(l){return l.firstName===d.firstName&&l.company===d.company;});
+  var e = {firstName:d.firstName||'Unknown',company:d.company||'-',role:d.role||'-',employees:d.employees||'-',
+    interest:d.interest||'-',phone:d.phone||'-',email:d.email||'-',timeline:d.timeline||'-',
+    apptType:d.apptType||'-',ichra:ichra,ichraBudget:d.ichra_budget||'-',status:status,time:new Date().toLocaleTimeString()};
+  if(idx>=0) all[idx]=e; else all.unshift(e);
+  localStorage.setItem('bb_leads', JSON.stringify(all.slice(0,500)));
+}
+function saveApptLocal(d, type) {
+  var all = JSON.parse(localStorage.getItem('bb_appts')||'[]');
+  all.unshift({firstName:d.firstName||'-',company:d.company||'-',type:type,phone:d.phone||'-',email:d.email||'-',interest:d.interest||'-',time:new Date().toLocaleTimeString()});
+  localStorage.setItem('bb_appts', JSON.stringify(all.slice(0,500)));
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────
+function tnow(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function notif(msg,type){var el=document.getElementById('notif');el.textContent=msg;el.className='notif show'+(type?' '+type:'');setTimeout(function(){el.className='notif';},3000);}
+
+// ── BOOT ──────────────────────────────────────────────────────────────
+window.addEventListener('load', function(){
+  applyBranding();
+  setTimeout(start, 600);
+});
+</script>
+</body>
+</html>
