@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book of Business Analyzer | Channel One Strategies</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; }
+
+  /* Header */
+  .header { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); border-bottom: 1px solid #0BDA51; padding: 20px 32px; display: flex; align-items: center; gap: 16px; }
+  .header svg { width: 40px; height: 40px; }
+  .header h1 { font-size: 22px; font-weight: 700; color: #fff; }
+  .header h1 span { color: #0BDA51; }
+  .header .subtitle { font-size: 13px; color: #888; margin-top: 2px; }
+
+  /* Upload Zone */
+  .upload-zone { max-width: 700px; margin: 60px auto; padding: 60px 40px; border: 2px dashed #333; border-radius: 16px; text-align: center; cursor: pointer; transition: all 0.3s; background: #111; }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: #0BDA51; background: rgba(11,218,81,0.04); }
+  .upload-zone svg { width: 64px; height: 64px; margin-bottom: 16px; color: #0BDA51; }
+  .upload-zone h2 { font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+  .upload-zone p { color: #888; font-size: 14px; }
+  .upload-zone input { display: none; }
+  .upload-zone .formats { margin-top: 16px; display: flex; gap: 8px; justify-content: center; }
+  .upload-zone .formats span { background: #1a1a1a; border: 1px solid #333; padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #aaa; }
+
+  /* Loading */
+  .loading { text-align: center; padding: 80px 20px; }
+  .loading .spinner { width: 48px; height: 48px; border: 3px solid #333; border-top-color: #0BDA51; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Dashboard */
+  .dashboard { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .dash-header h2 { font-size: 20px; font-weight: 700; color: #fff; }
+  .dash-header .file-info { font-size: 13px; color: #888; }
+  .btn-new { background: transparent; border: 1px solid #0BDA51; color: #0BDA51; padding: 8px 20px; border-radius: 8px; font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+  .btn-new:hover { background: #0BDA51; color: #000; }
+
+  /* KPI Cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .kpi { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 20px; }
+  .kpi .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi .value { font-size: 28px; font-weight: 700; color: #fff; }
+  .kpi .value.green { color: #0BDA51; }
+  .kpi .sub { font-size: 12px; color: #666; margin-top: 4px; }
+
+  /* Chart panels */
+  .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-bottom: 24px; }
+  .panel { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 20px; }
+  .panel h3 { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #222; }
+  .panel canvas { max-height: 300px; }
+
+  /* Tables */
+  .table-panel { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 20px; margin-bottom: 24px; overflow-x: auto; }
+  .table-panel h3 { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #222; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { text-align: left; padding: 10px 12px; color: #0BDA51; font-weight: 600; border-bottom: 1px solid #333; white-space: nowrap; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid #1a1a1a; color: #ccc; }
+  tbody tr:hover { background: rgba(11,218,81,0.04); }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .tag-green { background: rgba(11,218,81,0.15); color: #0BDA51; }
+  .tag-yellow { background: rgba(255,193,7,0.15); color: #ffc107; }
+  .tag-red { background: rgba(244,67,54,0.15); color: #f44336; }
+  .tag-blue { background: rgba(33,150,243,0.15); color: #2196f3; }
+
+  /* Penetration bar */
+  .pen-bar { width: 100px; height: 8px; background: #222; border-radius: 4px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  .pen-bar-fill { height: 100%; border-radius: 4px; }
+
+  /* Product dots */
+  .product-dots { display: flex; gap: 4px; flex-wrap: wrap; }
+  .product-dot { width: 24px; height: 20px; border-radius: 4px; font-size: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
+  .product-dot.active { background: rgba(11,218,81,0.2); color: #0BDA51; }
+  .product-dot.inactive { background: #1a1a1a; color: #444; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-family: inherit; cursor: pointer; border: 1px solid #333; background: transparent; color: #888; transition: all 0.2s; }
+  .tab.active { border-color: #0BDA51; color: #0BDA51; background: rgba(11,218,81,0.08); }
+  .tab:hover { border-color: #555; color: #ccc; }
+
+  /* Search */
+  .search-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .search-bar input, .search-bar select { background: #1a1a1a; border: 1px solid #333; color: #e0e0e0; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-family: inherit; }
+  .search-bar input { flex: 1; min-width: 200px; }
+  .search-bar input:focus, .search-bar select:focus { outline: none; border-color: #0BDA51; }
+
+  /* Scrollable table */
+  .scroll-table { max-height: 500px; overflow-y: auto; }
+  .scroll-table::-webkit-scrollbar { width: 6px; }
+  .scroll-table::-webkit-scrollbar-track { background: #111; }
+  .scroll-table::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .chart-grid { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .dashboard { padding: 16px; }
+  }
+
+  /* Buttons */
+  .btn-export { background: transparent; border: 1px solid #555; color: #aaa; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+  .btn-export:hover { border-color: #0BDA51; color: #0BDA51; }
+  .btn-export-green { background: rgba(11,218,81,0.1); border: 1px solid #0BDA51; color: #0BDA51; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+  .btn-export-green:hover { background: #0BDA51; color: #000; }
+  .btn-export-green:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-export-sm { background: rgba(11,218,81,0.08); border: 1px solid #0BDA5166; color: #0BDA51; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+  .btn-export-sm:hover { background: #0BDA51; color: #000; }
+
+  /* Export panel */
+  .export-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .export-controls select { background: #1a1a1a; border: 1px solid #333; color: #e0e0e0; padding: 10px 14px; border-radius: 8px; font-size: 14px; font-family: inherit; min-width: 200px; }
+  .export-controls select:focus { outline: none; border-color: #0BDA51; }
+  .export-count { font-size: 14px; color: #0BDA51; font-weight: 600; }
+  .export-hint { font-size: 12px; color: #666; }
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+  .checkbox-group label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #ccc; cursor: pointer; padding: 6px 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; transition: all 0.2s; }
+  .checkbox-group label:hover { border-color: #555; }
+  .checkbox-group label.checked { border-color: #0BDA51; background: rgba(11,218,81,0.08); }
+  .checkbox-group input[type="checkbox"] { accent-color: #0BDA51; }
+
+  /* Roadmap / Coming Soon */
+  .roadmap { margin-top: 40px; padding-top: 32px; border-top: 1px solid #222; }
+  .roadmap h3 { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .roadmap .roadmap-sub { font-size: 13px; color: #666; margin-bottom: 20px; }
+  .roadmap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .roadmap-tile { background: #111; border: 1px solid #1e1e1e; border-radius: 12px; padding: 24px; position: relative; overflow: hidden; transition: border-color 0.3s; }
+  .roadmap-tile:hover { border-color: #333; }
+  .roadmap-tile .coming-badge { position: absolute; top: 14px; right: 14px; background: rgba(11,218,81,0.1); border: 1px solid rgba(11,218,81,0.25); color: #0BDA51; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 3px 10px; border-radius: 20px; }
+  .roadmap-tile .tile-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; font-size: 20px; }
+  .roadmap-tile h4 { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .roadmap-tile p { font-size: 13px; color: #888; line-height: 1.5; }
+  .roadmap-tile .tile-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .roadmap-tile .tile-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; background: #1a1a1a; color: #666; border: 1px solid #222; }
+  .phase-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #555; margin-bottom: 12px; margin-top: 8px; padding-left: 2px; }
+  .phase-label span { color: #0BDA51; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" rx="20" fill="#0BDA51" fill-opacity="0.1"/>
+    <path d="M30 65 L30 35 Q30 25 40 25 L55 25" stroke="#0BDA51" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <path d="M50 50 L70 50" stroke="#0BDA51" stroke-width="6" stroke-linecap="round"/>
+    <path d="M50 38 L70 38" stroke="#0BDA51" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+    <path d="M50 62 L65 62" stroke="#0BDA51" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+    <circle cx="72" cy="68" r="10" stroke="#0BDA51" stroke-width="3" fill="none"/>
+    <path d="M79 75 L85 81" stroke="#0BDA51" stroke-width="3" stroke-linecap="round"/>
+  </svg>
+  <div>
+    <h1>Book of Business <span>Analyzer</span></h1>
+    <div class="subtitle">Channel One Strategies — Account Intelligence</div>
+  </div>
+</div>
+
+<div id="app"></div>
+
+<script>
+// ============================================================
+// GLOBALS
+// ============================================================
+const LOB_LABELS = {
+  ACC: 'Accident', CAN: 'Cancer', DEN: 'Dental', 'HOSP IND': 'Hospital',
+  HIC: 'Critical Illness', SHE: 'Short-term', STD: 'STD', VIS: 'Vision', LIFE: 'Life'
+};
+const LOB_KEYS = Object.keys(LOB_LABELS);
+const GREEN = '#0BDA51';
+const CHART_COLORS = ['#0BDA51','#00b8d4','#ffc107','#ff6d00','#e040fb','#2979ff','#f44336','#76ff03','#ff4081'];
+
+let parsedData = null;
+let charts = {};
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+function renderUpload() {
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="upload-zone" id="dropZone">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <h2>Upload Your Book of Business</h2>
+      <p>Drag & drop your account detail report, or click to browse</p>
+      <div class="formats">
+        <span>.xlsx</span><span>.xls</span><span>.csv</span>
+      </div>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+    </div>
+  `;
+
+  const zone = document.getElementById('dropZone');
+  const input = document.getElementById('fileInput');
+
+  zone.addEventListener('click', () => input.click());
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', (e) => { e.preventDefault(); zone.classList.remove('drag-over'); if(e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]); });
+  input.addEventListener('change', (e) => { if(e.target.files.length) processFile(e.target.files[0]); });
+}
+
+function renderLoading(filename) {
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <h3 style="color:#fff;margin-bottom:8px;">Analyzing ${filename}</h3>
+      <p style="color:#888;">Parsing accounts, calculating metrics...</p>
+    </div>
+  `;
+}
+
+// ============================================================
+// FILE PROCESSING
+// ============================================================
+function processFile(file) {
+  renderLoading(file.name);
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array', cellDates: true });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+      // Find header row (row with most non-empty cells, at least 20 columns)
+      let headerRow = 0;
+      let maxCols = 0;
+      for (let i = 0; i < Math.min(30, raw.length); i++) {
+        const nonEmpty = raw[i].filter(c => c !== '' && c != null).length;
+        if (nonEmpty > maxCols) { maxCols = nonEmpty; headerRow = i; }
+      }
+
+      const headers = raw[headerRow].map(h => String(h).trim().replace(/\n/g, ' '));
+      const rows = [];
+      for (let i = headerRow + 1; i < raw.length; i++) {
+        const row = {};
+        let hasData = false;
+        headers.forEach((h, idx) => {
+          const val = raw[i] ? raw[i][idx] : '';
+          if (val !== '' && val != null) hasData = true;
+          row[h] = val;
+        });
+        if (hasData) rows.push(row);
+      }
+
+      // Build column map (fuzzy match)
+      const colMap = buildColumnMap(headers);
+
+      parsedData = { filename: file.name, headers, rows, colMap, headerRow };
+      setTimeout(() => renderDashboard(), 100);
+    } catch(err) {
+      alert('Error parsing file: ' + err.message);
+      renderUpload();
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function buildColumnMap(headers) {
+  const map = {};
+  const find = (patterns) => {
+    for (const p of patterns) {
+      const idx = headers.findIndex(h => h.toLowerCase().replace(/\s+/g,' ').includes(p.toLowerCase()));
+      if (idx >= 0) return headers[idx];
+    }
+    return null;
+  };
+
+  map.accountName = find(['Account Name']);
+  map.accountNumber = find(['Account Number']);
+  map.accountStatus = find(['Account Status']);
+  map.accountType = find(['Account Type']);
+  map.accountSize = find(['Account Size Reporting']);
+  map.employeeCount = find(['Current Employee Count','Employee Count']);
+  map.policyholders = find(['Active Policyholders','Policyholders']);
+  map.penetration = find(['Policyholder Penetration %','Penetration %']);
+  map.penCategory = find(['Penetration Reporting']);
+  map.industry = find(['Industry']);
+  map.lobCount = find(['LOB Count Classification','LOB Count']);
+  map.lobCountNum = find(['LOB Count']);
+  map.enrollAP = find(['Open Enrollment AP']);
+  map.prevEnrollAP = find(['Previous Year Enrollment AP']);
+  map.productiveEnroll = find(['Productive Enrollment']);
+  map.city = find(['Location City']);
+  map.state = find(['Location State']);
+  map.zip = find(['Location Zip']);
+  map.county = find(['County']);
+  map.phone = find(['Phone Number']);
+  map.email = find(['Account Email']);
+  map.decisionMaker = find(['Acct Decision Maker','Decision Maker']);
+  map.broker = find(['Servicing Broker Name','Broker Name']);
+  map.servicing = find(['Servicing Associate Name']);
+  map.hqIndicator = find(['HQ Indicator']);
+  map.inactiveMonths = find(['Months Inactive']);
+  map.inactivityClass = find(['Inactivity Period']);
+  map.establishedDate = find(['Established Date']);
+  map.ytdAP = find(['YTD Gross AP']);
+  map.prevYearAP = find(['2022','Gross AP']);
+
+  // LOB columns — match exactly
+  map.lobs = {};
+  for (const key of LOB_KEYS) {
+    const exact = headers.find(h => h.trim() === key);
+    if (exact) map.lobs[key] = exact;
+  }
+
+  return map;
+}
+
+function getVal(row, key) {
+  const col = parsedData.colMap[key];
+  if (!col) return '';
+  const v = row[col];
+  return v != null ? v : '';
+}
+
+function getNum(row, key) {
+  const v = getVal(row, key);
+  const n = parseFloat(String(v).replace(/[,$\s]/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+
+function getLOB(row, lobKey) {
+  const col = parsedData.colMap.lobs[lobKey];
+  if (!col) return 0;
+  const v = parseFloat(row[col]);
+  return isNaN(v) ? 0 : v;
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const { rows, filename, colMap } = parsedData;
+
+  // Compute metrics
+  const totalAccounts = rows.length;
+  const activeAccounts = rows.filter(r => String(getVal(r,'accountStatus')).toUpperCase() === 'A').length;
+  const pendingAccounts = rows.filter(r => String(getVal(r,'accountStatus')).toUpperCase() === 'P').length;
+
+  const totalEmployees = rows.reduce((s,r) => s + getNum(r,'employeeCount'), 0);
+  const totalPolicyholders = rows.reduce((s,r) => s + getNum(r,'policyholders'), 0);
+
+  // Average penetration
+  const penVals = rows.map(r => getNum(r,'penetration')).filter(v => v > 0);
+  const avgPenetration = penVals.length ? (penVals.reduce((a,b)=>a+b,0) / penVals.length) : 0;
+
+  // LOB penetration
+  const lobStats = {};
+  LOB_KEYS.forEach(lob => {
+    if (!colMap.lobs[lob]) return;
+    const withProduct = rows.filter(r => getLOB(r, lob) > 0).length;
+    lobStats[lob] = { count: withProduct, pct: totalAccounts ? (withProduct / totalAccounts * 100) : 0 };
+  });
+
+  // Account size distribution
+  const sizeGroups = {};
+  rows.forEach(r => {
+    const size = String(getVal(r,'accountSize')).trim() || 'Unknown';
+    sizeGroups[size] = (sizeGroups[size] || 0) + 1;
+  });
+
+  // Industry breakdown
+  const industryGroups = {};
+  rows.forEach(r => {
+    const ind = String(getVal(r,'industry')).trim() || 'Unknown';
+    industryGroups[ind] = (industryGroups[ind] || 0) + 1;
+  });
+  const topIndustries = Object.entries(industryGroups).sort((a,b) => b[1]-a[1]).slice(0,10);
+
+  // Top accounts by employee count
+  const topBySize = [...rows].sort((a,b) => getNum(b,'employeeCount') - getNum(a,'employeeCount')).slice(0,20);
+
+  // Cross-sell opportunities: active accounts with < 3 LOBs and 10+ employees
+  const crossSell = rows.filter(r => {
+    const status = String(getVal(r,'accountStatus')).toUpperCase();
+    const emps = getNum(r,'employeeCount');
+    const lobCt = LOB_KEYS.reduce((s, lob) => s + (getLOB(r, lob) > 0 ? 1 : 0), 0);
+    return status === 'A' && emps >= 10 && lobCt < 3;
+  }).sort((a,b) => getNum(b,'employeeCount') - getNum(a,'employeeCount')).slice(0,30);
+
+  // Inactive accounts (months inactive > 0)
+  const inactiveAccounts = rows.filter(r => {
+    const mi = getNum(r,'inactiveMonths');
+    return mi > 0;
+  });
+  const inactive6Plus = inactiveAccounts.filter(r => getNum(r,'inactiveMonths') >= 6);
+  const inactive12Plus = inactiveAccounts.filter(r => getNum(r,'inactiveMonths') >= 12);
+
+  // LOB count distribution
+  const lobCountDist = {};
+  rows.forEach(r => {
+    const ct = LOB_KEYS.reduce((s, lob) => s + (getLOB(r, lob) > 0 ? 1 : 0), 0);
+    lobCountDist[ct] = (lobCountDist[ct] || 0) + 1;
+  });
+
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="dashboard">
+      <div class="dash-header">
+        <div>
+          <h2>Account Analysis</h2>
+          <div class="file-info">${filename} — ${totalAccounts.toLocaleString()} accounts loaded</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-export" id="btnExport">Export Summary</button>
+          <button class="btn-new" id="btnNew">+ New File</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="label">Total Accounts</div>
+          <div class="value">${totalAccounts.toLocaleString()}</div>
+          <div class="sub">${activeAccounts.toLocaleString()} active · ${pendingAccounts} pending</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Total Employees</div>
+          <div class="value">${totalEmployees.toLocaleString()}</div>
+          <div class="sub">Across all accounts</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Active Policyholders</div>
+          <div class="value green">${totalPolicyholders.toLocaleString()}</div>
+          <div class="sub">Enrolled lives</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Avg Penetration</div>
+          <div class="value">${avgPenetration.toFixed(1)}%</div>
+          <div class="sub">Policyholder penetration</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Cross-Sell Opps</div>
+          <div class="value green">${crossSell.length}</div>
+          <div class="sub">Active, 10+ EEs, &lt;3 LOBs</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Inactive Accounts</div>
+          <div class="value" style="color:#ffc107;">${inactiveAccounts.length.toLocaleString()}</div>
+          <div class="sub">${inactive6Plus.length.toLocaleString()} at 6+ mo · ${inactive12Plus.length.toLocaleString()} at 12+ mo</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-tab="overview">Overview</button>
+        <button class="tab" data-tab="products">Product Penetration</button>
+        <button class="tab" data-tab="crosssell">Cross-Sell Opportunities</button>
+        <button class="tab" data-tab="inactive">Inactive Accounts</button>
+        <button class="tab" data-tab="export">Export Lists</button>
+        <button class="tab" data-tab="accounts">All Accounts</button>
+      </div>
+
+      <div id="tabContent"></div>
+
+      <!-- ROADMAP -->
+      <div class="roadmap">
+        <h3>Platform Roadmap</h3>
+        <div class="roadmap-sub">Where we're headed — from analysis to action.</div>
+
+        <div class="phase-label"><span>Phase 1</span> — Deeper Analytics</div>
+        <div class="roadmap-grid">
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(33,150,243,0.12);">📊</div>
+            <h4>Year-over-Year Comparison</h4>
+            <p>Upload multiple years of data and see trending — AP growth, policyholder movement, account gains and losses over time.</p>
+            <div class="tile-tags"><span class="tile-tag">Trend Analysis</span><span class="tile-tag">Multi-File</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(255,193,7,0.12);">⚠️</div>
+            <h4>At-Risk Account Alerts</h4>
+            <p>Flag accounts showing warning signs — declining policyholders, months of inactivity, shrinking AP, or low penetration drops.</p>
+            <div class="tile-tags"><span class="tile-tag">Risk Scoring</span><span class="tile-tag">Alerts</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(156,39,176,0.12);">🏆</div>
+            <h4>Account Health Score</h4>
+            <p>A composite score for each account based on penetration, LOB count, employee count, activity, and tenure — so you know where to focus.</p>
+            <div class="tile-tags"><span class="tile-tag">Scoring</span><span class="tile-tag">Prioritization</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(0,184,212,0.12);">🗺️</div>
+            <h4>Territory Mapping</h4>
+            <p>Visualize your book by geography — see account density by county, zip, or city with heat maps and cluster views.</p>
+            <div class="tile-tags"><span class="tile-tag">Geo View</span><span class="tile-tag">Heat Map</span></div>
+          </div>
+        </div>
+
+        <div class="phase-label" style="margin-top:28px;"><span>Phase 2</span> — Renewal & Retention CRM</div>
+        <div class="roadmap-grid">
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(11,218,81,0.12);">🔄</div>
+            <h4>Renewal Pipeline</h4>
+            <p>Auto-detect upcoming renewals from your data and organize them into a Kanban board — Not Started, In Progress, Quoted, Renewed, Lost.</p>
+            <div class="tile-tags"><span class="tile-tag">Pipeline</span><span class="tile-tag">Kanban</span><span class="tile-tag">Workflow</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(244,67,54,0.12);">🛡️</div>
+            <h4>Retention Tracker</h4>
+            <p>Track which accounts renewed, which lapsed, and your overall retention rate. See retention by size, industry, and product line.</p>
+            <div class="tile-tags"><span class="tile-tag">Retention Rate</span><span class="tile-tag">Lapse Tracking</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(255,109,0,0.12);">📋</div>
+            <h4>Account Activity Log</h4>
+            <p>Log calls, emails, meetings, and notes against each account. See full interaction history at a glance before every touchpoint.</p>
+            <div class="tile-tags"><span class="tile-tag">Activity Log</span><span class="tile-tag">Notes</span><span class="tile-tag">History</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(233,30,99,0.12);">🎯</div>
+            <h4>Task & Follow-Up Manager</h4>
+            <p>Create tasks tied to accounts — follow-up calls, quote deadlines, enrollment check-ins — with reminders and due dates.</p>
+            <div class="tile-tags"><span class="tile-tag">Tasks</span><span class="tile-tag">Reminders</span><span class="tile-tag">Due Dates</span></div>
+          </div>
+        </div>
+
+        <div class="phase-label" style="margin-top:28px;"><span>Phase 3</span> — Campaigns & Outreach</div>
+        <div class="roadmap-grid">
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(103,58,183,0.12);">📧</div>
+            <h4>Email Campaign Builder</h4>
+            <p>Build targeted email campaigns from your export lists — cross-sell, renewal reminders, open enrollment nudges — with templates and scheduling.</p>
+            <div class="tile-tags"><span class="tile-tag">Email</span><span class="tile-tag">Templates</span><span class="tile-tag">Scheduling</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(0,150,136,0.12);">📱</div>
+            <h4>Multi-Channel Drip Sequences</h4>
+            <p>Automated outreach sequences — email, text, call reminders — triggered by renewal date, inactivity, or missing product. Set it and let it run.</p>
+            <div class="tile-tags"><span class="tile-tag">Automation</span><span class="tile-tag">Drip</span><span class="tile-tag">SMS</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(63,81,181,0.12);">📊</div>
+            <h4>Campaign Performance Dashboard</h4>
+            <p>Track open rates, click-throughs, replies, and conversions. See which campaigns drive the most renewals and cross-sells.</p>
+            <div class="tile-tags"><span class="tile-tag">Analytics</span><span class="tile-tag">ROI</span><span class="tile-tag">Conversion</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(255,152,0,0.12);">🤖</div>
+            <h4>AI Outreach Assistant</h4>
+            <p>AI generates personalized outreach messaging per account — pulling in their name, products, employee size, and renewal window to draft ready-to-send emails.</p>
+            <div class="tile-tags"><span class="tile-tag">AI</span><span class="tile-tag">Personalization</span><span class="tile-tag">Copy Gen</span></div>
+          </div>
+        </div>
+
+        <div class="phase-label" style="margin-top:28px;"><span>Phase 4</span> — Intelligence & Benchmarking</div>
+        <div class="roadmap-grid">
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(121,134,203,0.12);">🧠</div>
+            <h4>Ideal Customer Profile</h4>
+            <p>AI analyzes your best accounts — high penetration, high AP, multi-LOB — and builds a profile to score prospects and prioritize cross-sell targets.</p>
+            <div class="tile-tags"><span class="tile-tag">AI</span><span class="tile-tag">ICP</span><span class="tile-tag">Scoring</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(38,166,154,0.12);">📈</div>
+            <h4>Book Valuation Estimator</h4>
+            <p>Estimate the market value of your book based on AP, retention rate, account mix, and industry benchmarks. Track value over time.</p>
+            <div class="tile-tags"><span class="tile-tag">Valuation</span><span class="tile-tag">Benchmarking</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(239,83,80,0.12);">🔗</div>
+            <h4>CRM & AMS Integrations</h4>
+            <p>Connect to your existing tools — sync accounts to Salesforce, HubSpot, or your AMS so data flows both ways without manual exports.</p>
+            <div class="tile-tags"><span class="tile-tag">API</span><span class="tile-tag">Sync</span><span class="tile-tag">Integrations</span></div>
+          </div>
+          <div class="roadmap-tile">
+            <span class="coming-badge">Coming Soon</span>
+            <div class="tile-icon" style="background:rgba(178,235,242,0.12);">👥</div>
+            <h4>Team Leaderboard & Reporting</h4>
+            <p>Multi-agent view — compare book size, growth rate, retention, and cross-sell success across your team or region.</p>
+            <div class="tile-tags"><span class="tile-tag">Team</span><span class="tile-tag">Leaderboard</span><span class="tile-tag">Reporting</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  `;
+
+  document.getElementById('btnNew').addEventListener('click', () => { destroyCharts(); renderUpload(); });
+  document.getElementById('btnExport').addEventListener('click', () => exportSummary());
+
+  // Tab switching
+  const tabBtns = document.querySelectorAll('.tab');
+  tabBtns.forEach(btn => btn.addEventListener('click', () => {
+    tabBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    destroyCharts();
+    const tab = btn.dataset.tab;
+    if (tab === 'overview') renderOverview(sizeGroups, topIndustries, lobCountDist, lobStats, topBySize);
+    else if (tab === 'products') renderProducts(lobStats, rows);
+    else if (tab === 'crosssell') renderCrossSell(crossSell, rows);
+    else if (tab === 'inactive') renderInactiveAccounts(rows);
+    else if (tab === 'export') renderExportLists(rows, lobStats);
+    else if (tab === 'accounts') renderAccounts(rows);
+  }));
+
+  renderOverview(sizeGroups, topIndustries, lobCountDist, lobStats, topBySize);
+}
+
+function destroyCharts() {
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
+  charts = {};
+}
+
+// ============================================================
+// OVERVIEW TAB
+// ============================================================
+function renderOverview(sizeGroups, topIndustries, lobCountDist, lobStats, topBySize) {
+  const tc = document.getElementById('tabContent');
+
+  // Sort size groups logically
+  const sizeOrder = ['0 - 2','3 - 9','10 - 24','25 - 49','50 - 99','100 - 249','250 - 499','500 - 999','1000 Plus'];
+  const sortedSizes = Object.entries(sizeGroups).sort((a,b) => {
+    const ai = sizeOrder.indexOf(a[0]);
+    const bi = sizeOrder.indexOf(b[0]);
+    if (ai >= 0 && bi >= 0) return ai - bi;
+    if (ai >= 0) return -1;
+    if (bi >= 0) return 1;
+    return a[0].localeCompare(b[0]);
+  });
+
+  tc.innerHTML = `
+    <div class="chart-grid">
+      <div class="panel">
+        <h3>Account Size Distribution</h3>
+        <canvas id="chartSize"></canvas>
+      </div>
+      <div class="panel">
+        <h3>Product Penetration Across Book</h3>
+        <canvas id="chartLob"></canvas>
+      </div>
+      <div class="panel">
+        <h3>LOB Count per Account</h3>
+        <canvas id="chartLobCount"></canvas>
+      </div>
+      <div class="panel">
+        <h3>Top Industries</h3>
+        <canvas id="chartIndustry"></canvas>
+      </div>
+    </div>
+    <div class="table-panel">
+      <h3>Largest Accounts</h3>
+      <div class="scroll-table">
+        <table>
+          <thead><tr>
+            <th>Account Name</th><th>Employees</th><th>Policyholders</th><th>Penetration</th><th>LOBs</th><th>Status</th>
+          </tr></thead>
+          <tbody>
+            ${topBySize.map(r => {
+              const emps = getNum(r,'employeeCount');
+              const phs = getNum(r,'policyholders');
+              const pen = getNum(r,'penetration');
+              const status = String(getVal(r,'accountStatus')).toUpperCase();
+              const lobCt = LOB_KEYS.reduce((s,l) => s + (getLOB(r,l)>0?1:0), 0);
+              const statusClass = status==='A' ? 'tag-green' : status==='P' ? 'tag-yellow' : 'tag-red';
+              const penColor = pen >= 60 ? '#0BDA51' : pen >= 30 ? '#ffc107' : '#f44336';
+              return `<tr>
+                <td style="color:#fff;font-weight:500;">${getVal(r,'accountName')}</td>
+                <td>${emps.toLocaleString()}</td>
+                <td>${phs.toLocaleString()}</td>
+                <td><span class="pen-bar"><span class="pen-bar-fill" style="width:${Math.min(pen,100)}%;background:${penColor}"></span></span>${pen.toFixed(0)}%</td>
+                <td>${lobCt}</td>
+                <td><span class="tag ${statusClass}">${status}</span></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  // Size chart
+  charts.size = new Chart(document.getElementById('chartSize'), {
+    type: 'bar',
+    data: {
+      labels: sortedSizes.map(s => s[0]),
+      datasets: [{ data: sortedSizes.map(s => s[1]), backgroundColor: GREEN+'aa', borderColor: GREEN, borderWidth: 1, borderRadius: 4 }]
+    },
+    options: chartOpts('Accounts')
+  });
+
+  // LOB penetration chart
+  const lobEntries = Object.entries(lobStats).sort((a,b) => b[1].pct - a[1].pct);
+  charts.lob = new Chart(document.getElementById('chartLob'), {
+    type: 'bar',
+    data: {
+      labels: lobEntries.map(l => LOB_LABELS[l[0]] || l[0]),
+      datasets: [{ data: lobEntries.map(l => l[1].pct), backgroundColor: CHART_COLORS.slice(0, lobEntries.length), borderRadius: 4 }]
+    },
+    options: chartOpts('% of Accounts', true)
+  });
+
+  // LOB count distribution
+  const lobCountEntries = Object.entries(lobCountDist).sort((a,b) => Number(a[0]) - Number(b[0]));
+  charts.lobCount = new Chart(document.getElementById('chartLobCount'), {
+    type: 'doughnut',
+    data: {
+      labels: lobCountEntries.map(l => l[0] + ' LOB' + (l[0]==='1'?'':'s')),
+      datasets: [{ data: lobCountEntries.map(l => l[1]), backgroundColor: CHART_COLORS }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#ccc', font: { size: 11 } } } } }
+  });
+
+  // Industry chart
+  charts.industry = new Chart(document.getElementById('chartIndustry'), {
+    type: 'bar',
+    data: {
+      labels: topIndustries.map(i => i[0].length > 25 ? i[0].slice(0,25)+'…' : i[0]),
+      datasets: [{ data: topIndustries.map(i => i[1]), backgroundColor: '#00b8d4aa', borderColor: '#00b8d4', borderWidth: 1, borderRadius: 4 }]
+    },
+    options: { ...chartOpts('Accounts'), indexAxis: 'y' }
+  });
+}
+
+// ============================================================
+// PRODUCTS TAB
+// ============================================================
+function renderProducts(lobStats, rows) {
+  const tc = document.getElementById('tabContent');
+  const lobEntries = Object.entries(lobStats).sort((a,b) => b[1].pct - a[1].pct);
+
+  tc.innerHTML = `
+    <div class="kpi-grid" style="margin-bottom:24px;">
+      ${lobEntries.map(([key, stat]) => `
+        <div class="kpi">
+          <div class="label">${LOB_LABELS[key] || key}</div>
+          <div class="value green">${stat.pct.toFixed(1)}%</div>
+          <div class="sub">${stat.count.toLocaleString()} accounts</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="chart-grid">
+      <div class="panel" style="grid-column: 1 / -1;">
+        <h3>Product Penetration by Account Size</h3>
+        <canvas id="chartProdSize" style="max-height:400px;"></canvas>
+      </div>
+    </div>
+    <div class="table-panel">
+      <h3>Product Distribution — Active Policyholders by LOB</h3>
+      <div class="scroll-table">
+        <table>
+          <thead><tr>
+            <th>Product</th><th>Accounts With</th><th>% of Book</th><th>Total Policyholders</th><th>Avg per Account</th>
+          </tr></thead>
+          <tbody>
+            ${lobEntries.map(([key, stat]) => {
+              const totalPH = rows.reduce((s,r) => s + getLOB(r, key), 0);
+              const avgPH = stat.count ? (totalPH / stat.count) : 0;
+              return `<tr>
+                <td style="color:#fff;font-weight:500;">${LOB_LABELS[key] || key}</td>
+                <td>${stat.count.toLocaleString()}</td>
+                <td><span class="pen-bar"><span class="pen-bar-fill" style="width:${stat.pct}%;background:${GREEN}"></span></span>${stat.pct.toFixed(1)}%</td>
+                <td>${totalPH.toLocaleString()}</td>
+                <td>${avgPH.toFixed(1)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  // Product penetration by account size
+  const sizeOrder = ['0 - 2','3 - 9','10 - 24','25 - 49','50 - 99','100 - 249','250 - 499','500 - 999','1000 Plus'];
+  const sizeGroups = {};
+  rows.forEach(r => {
+    const size = String(getVal(r,'accountSize')).trim();
+    if (!sizeGroups[size]) sizeGroups[size] = [];
+    sizeGroups[size].push(r);
+  });
+  const activeSizes = sizeOrder.filter(s => sizeGroups[s] && sizeGroups[s].length > 0);
+  const datasets = lobEntries.slice(0,6).map(([key], i) => ({
+    label: LOB_LABELS[key] || key,
+    data: activeSizes.map(size => {
+      const grp = sizeGroups[size] || [];
+      const withProd = grp.filter(r => getLOB(r, key) > 0).length;
+      return grp.length ? (withProd / grp.length * 100) : 0;
+    }),
+    backgroundColor: CHART_COLORS[i] + '99',
+    borderColor: CHART_COLORS[i],
+    borderWidth: 1,
+    borderRadius: 3
+  }));
+
+  charts.prodSize = new Chart(document.getElementById('chartProdSize'), {
+    type: 'bar',
+    data: { labels: activeSizes, datasets },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { color: '#ccc', font: { size: 11 } } } },
+      scales: {
+        x: { ticks: { color: '#888' }, grid: { color: '#222' } },
+        y: { ticks: { color: '#888', callback: v => v+'%' }, grid: { color: '#222' } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// CROSS-SELL TAB
+// ============================================================
+function renderCrossSell(crossSell, allRows) {
+  const tc = document.getElementById('tabContent');
+  tc.innerHTML = `
+    <div class="panel" style="margin-bottom:24px;padding:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h3 style="border:none;padding:0;margin-bottom:8px;">Cross-Sell Opportunities</h3>
+          <p style="color:#888;font-size:13px;">Active accounts with 10+ employees and fewer than 3 lines of business — these are your biggest growth opportunities.</p>
+        </div>
+        <button class="btn-export-sm" id="exportCrossSell">Export ${crossSell.length} Accounts as CSV</button>
+      </div>
+    </div>
+    <div class="table-panel">
+      <div class="scroll-table">
+        <table>
+          <thead><tr>
+            <th>Account Name</th><th>Employees</th><th>City / State</th><th>Current Products</th><th>Missing Products</th><th>Contact</th><th>Phone</th><th>Email</th>
+          </tr></thead>
+          <tbody>
+            ${crossSell.map(r => {
+              const emps = getNum(r,'employeeCount');
+              const city = getVal(r,'city');
+              const state = getVal(r,'state');
+              const loc = [city,state].filter(Boolean).join(', ');
+              const currentProds = LOB_KEYS.filter(l => getLOB(r,l) > 0);
+              const missingProds = LOB_KEYS.filter(l => parsedData.colMap.lobs[l] && getLOB(r,l) === 0);
+              const contact = getVal(r,'decisionMaker') || '-';
+              const phone = getVal(r,'phone') || '-';
+              const email = getVal(r,'email') || '-';
+              return `<tr>
+                <td style="color:#fff;font-weight:500;">${getVal(r,'accountName')}</td>
+                <td>${emps.toLocaleString()}</td>
+                <td>${loc || '-'}</td>
+                <td><div class="product-dots">${currentProds.map(p => `<span class="product-dot active" title="${LOB_LABELS[p]||p}">${p.slice(0,3)}</span>`).join('')}</div></td>
+                <td><div class="product-dots">${missingProds.map(p => `<span class="product-dot inactive" title="${LOB_LABELS[p]||p}">${p.slice(0,3)}</span>`).join('')}</div></td>
+                <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${contact}">${String(contact).trim()}</td>
+                <td style="white-space:nowrap;">${String(phone).trim()}</td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${email}">${String(email).trim()}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('exportCrossSell').addEventListener('click', () => {
+    exportAccountList(crossSell, 'cross-sell-opportunities.csv', true);
+  });
+}
+
+// ============================================================
+// INACTIVE ACCOUNTS TAB
+// ============================================================
+function renderInactiveAccounts(rows) {
+  const tc = document.getElementById('tabContent');
+  let thresholdMonths = 1;
+  let minEmpFilter = 0;
+  let statusFilter = 'all';
+  let searchTerm = '';
+  let sortField = 'inactiveMonths';
+  let sortDir = -1;
+
+  function getInactive() {
+    let result = rows.filter(r => getNum(r,'inactiveMonths') >= thresholdMonths);
+    if (statusFilter !== 'all') result = result.filter(r => String(getVal(r,'accountStatus')).toUpperCase() === statusFilter);
+    if (minEmpFilter > 0) result = result.filter(r => getNum(r,'employeeCount') >= minEmpFilter);
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      result = result.filter(r =>
+        String(getVal(r,'accountName')).toLowerCase().includes(q) ||
+        String(getVal(r,'city')).toLowerCase().includes(q) ||
+        String(getVal(r,'broker')).toLowerCase().includes(q)
+      );
+    }
+    result.sort((a,b) => {
+      const av = sortField === 'inactiveMonths' ? getNum(a,'inactiveMonths') : getNum(a,'employeeCount');
+      const bv = sortField === 'inactiveMonths' ? getNum(b,'inactiveMonths') : getNum(b,'employeeCount');
+      return (bv - av) * sortDir;
+    });
+    return result;
+  }
+
+  function render() {
+    const filtered = getInactive();
+
+    // Bucket breakdown
+    const bucket1to3 = filtered.filter(r => { const m = getNum(r,'inactiveMonths'); return m >= 1 && m <= 3; }).length;
+    const bucket4to6 = filtered.filter(r => { const m = getNum(r,'inactiveMonths'); return m >= 4 && m <= 6; }).length;
+    const bucket7to12 = filtered.filter(r => { const m = getNum(r,'inactiveMonths'); return m >= 7 && m <= 12; }).length;
+    const bucket13plus = filtered.filter(r => getNum(r,'inactiveMonths') >= 13).length;
+
+    const totalEmpAtRisk = filtered.reduce((s,r) => s + getNum(r,'employeeCount'), 0);
+    const totalPHAtRisk = filtered.reduce((s,r) => s + getNum(r,'policyholders'), 0);
+
+    const display = filtered.slice(0, 100);
+
+    document.getElementById('inactiveCount').textContent = filtered.length.toLocaleString() + ' accounts';
+    document.getElementById('inactiveEmp').textContent = totalEmpAtRisk.toLocaleString() + ' employees at risk';
+
+    document.getElementById('bucket1to3').textContent = bucket1to3.toLocaleString();
+    document.getElementById('bucket4to6').textContent = bucket4to6.toLocaleString();
+    document.getElementById('bucket7to12').textContent = bucket7to12.toLocaleString();
+    document.getElementById('bucket13plus').textContent = bucket13plus.toLocaleString();
+
+    const tbody = document.getElementById('inactiveBody');
+    tbody.innerHTML = display.map(r => {
+      const months = getNum(r,'inactiveMonths');
+      const emps = getNum(r,'employeeCount');
+      const phs = getNum(r,'policyholders');
+      const lobCt = LOB_KEYS.reduce((s,l) => s + (getLOB(r,l)>0?1:0), 0);
+      const status = String(getVal(r,'accountStatus')).toUpperCase();
+      const statusClass = status==='A' ? 'tag-green' : status==='P' ? 'tag-yellow' : 'tag-red';
+      const urgency = months >= 12 ? 'tag-red' : months >= 6 ? 'tag-yellow' : 'tag-blue';
+      const urgencyLabel = months >= 12 ? 'Critical' : months >= 6 ? 'Warning' : 'Monitor';
+      const contact = getVal(r,'decisionMaker') || '-';
+      const phone = getVal(r,'phone') || '-';
+      const email = getVal(r,'email') || '-';
+      const inactClass = getVal(r,'inactivityClass') || '-';
+      return `<tr>
+        <td style="color:#fff;font-weight:500;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${getVal(r,'accountName')}</td>
+        <td style="text-align:center;"><span class="tag ${urgency}" style="min-width:32px;text-align:center;">${months}</span></td>
+        <td><span class="tag ${urgency}">${urgencyLabel}</span></td>
+        <td>${emps.toLocaleString()}</td>
+        <td>${phs.toLocaleString()}</td>
+        <td>${lobCt}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${contact}">${String(contact).trim()}</td>
+        <td style="white-space:nowrap;">${String(phone).trim()}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${email}">${String(email).trim()}</td>
+        <td>${[getVal(r,'city'),getVal(r,'state')].filter(Boolean).join(', ') || '-'}</td>
+        <td><span class="tag ${statusClass}">${status}</span></td>
+      </tr>`;
+    }).join('');
+
+    // Update export button data ref
+    window._lastInactiveFiltered = filtered;
+  }
+
+  tc.innerHTML = `
+    <div class="panel" style="margin-bottom:20px;padding:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div>
+          <h3 style="border:none;padding:0;margin-bottom:6px;">Inactive Accounts</h3>
+          <p style="color:#888;font-size:13px;">Accounts with months of inactivity — no agent service activity recorded. These accounts are at risk of lapsing and are prime targets for re-engagement outreach.</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-export-sm" id="btnExportInactiveCSV">Export CSV</button>
+          <button class="btn-export-sm" id="btnExportInactiveXLSX">Export Excel</button>
+        </div>
+      </div>
+
+      <!-- Buckets -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;">
+        <div style="background:#1a1a1a;border:1px solid #222;border-radius:8px;padding:14px;text-align:center;">
+          <div style="font-size:10px;color:#2196f3;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">1-3 Months</div>
+          <div style="font-size:22px;font-weight:700;color:#2196f3;" id="bucket1to3">—</div>
+        </div>
+        <div style="background:#1a1a1a;border:1px solid #222;border-radius:8px;padding:14px;text-align:center;">
+          <div style="font-size:10px;color:#ffc107;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">4-6 Months</div>
+          <div style="font-size:22px;font-weight:700;color:#ffc107;" id="bucket4to6">—</div>
+        </div>
+        <div style="background:#1a1a1a;border:1px solid #222;border-radius:8px;padding:14px;text-align:center;">
+          <div style="font-size:10px;color:#ff6d00;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">7-12 Months</div>
+          <div style="font-size:22px;font-weight:700;color:#ff6d00;" id="bucket7to12">—</div>
+        </div>
+        <div style="background:#1a1a1a;border:1px solid #222;border-radius:8px;padding:14px;text-align:center;">
+          <div style="font-size:10px;color:#f44336;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">13+ Months</div>
+          <div style="font-size:22px;font-weight:700;color:#f44336;" id="bucket13plus">—</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="search-bar">
+        <input type="text" id="inactiveSearch" placeholder="Search accounts, cities, brokers..." />
+        <select id="inactiveThreshold">
+          <option value="1">1+ months inactive</option>
+          <option value="3">3+ months inactive</option>
+          <option value="6" selected>6+ months inactive</option>
+          <option value="9">9+ months inactive</option>
+          <option value="12">12+ months inactive</option>
+          <option value="18">18+ months inactive</option>
+          <option value="24">24+ months inactive</option>
+        </select>
+        <select id="inactiveMinEmp">
+          <option value="0">All sizes</option>
+          <option value="5">5+ employees</option>
+          <option value="10">10+ employees</option>
+          <option value="25">25+ employees</option>
+          <option value="50">50+ employees</option>
+          <option value="100">100+ employees</option>
+        </select>
+        <select id="inactiveStatus">
+          <option value="all">All Status</option>
+          <option value="A">Active</option>
+          <option value="P">Pending</option>
+          <option value="D">Declined</option>
+        </select>
+        <span id="inactiveCount" style="color:#ffc107;font-size:13px;font-weight:600;align-self:center;"></span>
+        <span id="inactiveEmp" style="color:#888;font-size:12px;align-self:center;"></span>
+      </div>
+    </div>
+
+    <div class="table-panel">
+      <div class="scroll-table" style="max-height:600px;">
+        <table>
+          <thead><tr>
+            <th>Account Name</th>
+            <th style="cursor:pointer" id="sortInactiveMonths">Months ▼</th>
+            <th>Urgency</th>
+            <th style="cursor:pointer" id="sortInactiveEmp">Employees</th>
+            <th>Policyholders</th>
+            <th>LOBs</th>
+            <th>Decision Maker</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Location</th>
+            <th>Status</th>
+          </tr></thead>
+          <tbody id="inactiveBody"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  // Set initial threshold
+  thresholdMonths = 6;
+
+  document.getElementById('inactiveSearch').addEventListener('input', e => { searchTerm = e.target.value; render(); });
+  document.getElementById('inactiveThreshold').addEventListener('change', e => { thresholdMonths = parseInt(e.target.value); render(); });
+  document.getElementById('inactiveMinEmp').addEventListener('change', e => { minEmpFilter = parseInt(e.target.value); render(); });
+  document.getElementById('inactiveStatus').addEventListener('change', e => { statusFilter = e.target.value; render(); });
+  document.getElementById('sortInactiveMonths').addEventListener('click', () => { sortField = 'inactiveMonths'; sortDir = sortField === 'inactiveMonths' ? sortDir * -1 : -1; render(); });
+  document.getElementById('sortInactiveEmp').addEventListener('click', () => { sortField = 'employeeCount'; sortDir = sortField === 'employeeCount' ? sortDir * -1 : -1; render(); });
+
+  document.getElementById('btnExportInactiveCSV').addEventListener('click', () => {
+    const data = window._lastInactiveFiltered || getInactive();
+    exportInactiveList(data, 'inactive-accounts.csv', 'csv');
+  });
+  document.getElementById('btnExportInactiveXLSX').addEventListener('click', () => {
+    const data = window._lastInactiveFiltered || getInactive();
+    exportInactiveList(data, 'inactive-accounts.xlsx', 'xlsx');
+  });
+
+  render();
+}
+
+// Export inactive account list
+function exportInactiveList(accounts, filename, format) {
+  if (!accounts.length) return;
+
+  const headers = ['Account Name','Account Number','Months Inactive','Inactivity Class','Employees','Policyholders','Penetration %','LOBs','Account Status','Industry','Decision Maker','Phone','Email','City','State','Zip','County','Broker'];
+  LOB_KEYS.forEach(l => { if (parsedData.colMap.lobs[l]) headers.push(LOB_LABELS[l] || l); });
+
+  const buildRow = (r) => {
+    const lobCt = LOB_KEYS.reduce((s,l) => s + (getLOB(r,l)>0?1:0), 0);
+    const row = [
+      getVal(r,'accountName'),
+      getVal(r,'accountNumber'),
+      getNum(r,'inactiveMonths'),
+      getVal(r,'inactivityClass'),
+      getNum(r,'employeeCount'),
+      getNum(r,'policyholders'),
+      getNum(r,'penetration'),
+      lobCt,
+      getVal(r,'accountStatus'),
+      getVal(r,'industry'),
+      getVal(r,'decisionMaker'),
+      getVal(r,'phone'),
+      getVal(r,'email'),
+      getVal(r,'city'),
+      getVal(r,'state'),
+      getVal(r,'zip'),
+      getVal(r,'county'),
+      getVal(r,'broker'),
+    ];
+    LOB_KEYS.forEach(l => { if (parsedData.colMap.lobs[l]) row.push(getLOB(r, l)); });
+    return row;
+  };
+
+  if (format === 'xlsx') {
+    const data = [headers, ...accounts.map(buildRow)];
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = headers.map((h,i) => ({ wch: i === 0 ? 35 : i === 10 ? 25 : 15 }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inactive Accounts');
+    XLSX.writeFile(wb, filename);
+  } else {
+    const csvEscape = (val) => {
+      const s = String(val == null ? '' : val).trim();
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    };
+    let csv = headers.map(csvEscape).join(',') + '\n';
+    accounts.forEach(r => { csv += buildRow(r).map(csvEscape).join(',') + '\n'; });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+// ============================================================
+// EXPORT LISTS TAB
+// ============================================================
+function renderExportLists(rows, lobStats) {
+  const tc = document.getElementById('tabContent');
+  const availableLobs = LOB_KEYS.filter(l => parsedData.colMap.lobs[l]);
+
+  tc.innerHTML = `
+    <div class="panel" style="margin-bottom:24px;padding:24px;">
+      <h3 style="border:none;padding:0;margin-bottom:8px;">Export Account Lists by Product</h3>
+      <p style="color:#888;font-size:13px;margin-bottom:20px;">Select a product to find all accounts that <strong style="color:#fff;">do NOT</strong> have that product. Export the list with full contact info for outreach.</p>
+
+      <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+        <div style="flex:1;min-width:300px;">
+          <label style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">Accounts WITHOUT this product:</label>
+          <select id="exportLobSelect" style="background:#1a1a1a;border:1px solid #333;color:#e0e0e0;padding:12px 16px;border-radius:8px;font-size:15px;font-family:inherit;width:100%;">
+            <option value="">— Select a product —</option>
+            ${availableLobs.map(l => `<option value="${l}">${LOB_LABELS[l] || l}</option>`).join('')}
+          </select>
+        </div>
+        <div style="min-width:200px;">
+          <label style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">Account Status:</label>
+          <select id="exportStatusSelect" style="background:#1a1a1a;border:1px solid #333;color:#e0e0e0;padding:12px 16px;border-radius:8px;font-size:15px;font-family:inherit;width:100%;">
+            <option value="A">Active Only</option>
+            <option value="all">All Statuses</option>
+            <option value="P">Pending Only</option>
+          </select>
+        </div>
+        <div style="min-width:200px;">
+          <label style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">Min Employees:</label>
+          <select id="exportMinEmp" style="background:#1a1a1a;border:1px solid #333;color:#e0e0e0;padding:12px 16px;border-radius:8px;font-size:15px;font-family:inherit;width:100%;">
+            <option value="0">No minimum</option>
+            <option value="3">3+</option>
+            <option value="5">5+</option>
+            <option value="10" selected>10+</option>
+            <option value="25">25+</option>
+            <option value="50">50+</option>
+            <option value="100">100+</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="multiProductSection" style="margin-top:16px;">
+        <label style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">Also missing (optional — narrow list further):</label>
+        <div class="checkbox-group" id="additionalLobs"></div>
+      </div>
+
+      <div id="exportResults" style="margin-top:20px;"></div>
+    </div>
+
+    <div id="exportPreview"></div>
+  `;
+
+  const lobSelect = document.getElementById('exportLobSelect');
+  const statusSelect = document.getElementById('exportStatusSelect');
+  const minEmpSelect = document.getElementById('exportMinEmp');
+  const additionalLobs = document.getElementById('additionalLobs');
+
+  function updateAdditionalLobs() {
+    const primary = lobSelect.value;
+    const others = availableLobs.filter(l => l !== primary);
+    additionalLobs.innerHTML = primary ? others.map(l => `
+      <label><input type="checkbox" value="${l}" class="addlLob" /> ${LOB_LABELS[l] || l}</label>
+    `).join('') : '<span style="color:#555;font-size:13px;">Select a primary product first</span>';
+    additionalLobs.querySelectorAll('.addlLob').forEach(cb => cb.addEventListener('change', updateResults));
+  }
+
+  function getFilteredAccounts() {
+    const primaryLob = lobSelect.value;
+    if (!primaryLob) return [];
+
+    const statusVal = statusSelect.value;
+    const minEmp = parseInt(minEmpSelect.value) || 0;
+    const additionalMissing = [...document.querySelectorAll('.addlLob:checked')].map(cb => cb.value);
+
+    return rows.filter(r => {
+      // Must NOT have the primary product
+      if (getLOB(r, primaryLob) > 0) return false;
+      // Must NOT have additional missing products
+      for (const addl of additionalMissing) {
+        if (getLOB(r, addl) > 0) return false;
+      }
+      // Status filter
+      if (statusVal !== 'all' && String(getVal(r,'accountStatus')).toUpperCase() !== statusVal) return false;
+      // Min employee filter
+      if (getNum(r,'employeeCount') < minEmp) return false;
+      return true;
+    }).sort((a,b) => getNum(b,'employeeCount') - getNum(a,'employeeCount'));
+  }
+
+  function updateResults() {
+    const primaryLob = lobSelect.value;
+    const resultsDiv = document.getElementById('exportResults');
+    const previewDiv = document.getElementById('exportPreview');
+
+    // Toggle checked labels
+    additionalLobs.querySelectorAll('label').forEach(lbl => {
+      lbl.classList.toggle('checked', lbl.querySelector('input').checked);
+    });
+
+    if (!primaryLob) {
+      resultsDiv.innerHTML = '';
+      previewDiv.innerHTML = '';
+      return;
+    }
+
+    const filtered = getFilteredAccounts();
+    const additionalMissing = [...document.querySelectorAll('.addlLob:checked')].map(cb => LOB_LABELS[cb.value] || cb.value);
+    const missingLabel = [LOB_LABELS[primaryLob] || primaryLob, ...additionalMissing].join(', ');
+
+    resultsDiv.innerHTML = `
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 0;border-top:1px solid #222;">
+        <div>
+          <span class="export-count">${filtered.length.toLocaleString()} accounts</span>
+          <span style="color:#888;font-size:13px;"> without ${missingLabel}</span>
+        </div>
+        <button class="btn-export-green" id="btnExportFiltered" ${filtered.length===0?'disabled':''}>
+          Export as CSV
+        </button>
+        <button class="btn-export-sm" id="btnExportXlsx" ${filtered.length===0?'disabled':''}>
+          Export as Excel
+        </button>
+      </div>
+    `;
+
+    // Preview table
+    const preview = filtered.slice(0, 25);
+    previewDiv.innerHTML = filtered.length ? `
+      <div class="table-panel">
+        <h3>Preview (showing ${Math.min(25,filtered.length)} of ${filtered.length.toLocaleString()})</h3>
+        <div class="scroll-table">
+          <table>
+            <thead><tr>
+              <th>Account Name</th><th>Acct #</th><th>Employees</th><th>City</th><th>State</th><th>Decision Maker</th><th>Phone</th><th>Email</th><th>Broker</th><th>Products</th>
+            </tr></thead>
+            <tbody>
+              ${preview.map(r => {
+                const currentProds = LOB_KEYS.filter(l => getLOB(r,l) > 0);
+                return `<tr>
+                  <td style="color:#fff;font-weight:500;">${getVal(r,'accountName')}</td>
+                  <td>${getVal(r,'accountNumber')}</td>
+                  <td>${getNum(r,'employeeCount').toLocaleString()}</td>
+                  <td>${getVal(r,'city') || '-'}</td>
+                  <td>${getVal(r,'state') || '-'}</td>
+                  <td>${getVal(r,'decisionMaker') || '-'}</td>
+                  <td style="white-space:nowrap;">${getVal(r,'phone') || '-'}</td>
+                  <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;" title="${getVal(r,'email')}">${getVal(r,'email') || '-'}</td>
+                  <td>${getVal(r,'broker') || '-'}</td>
+                  <td><div class="product-dots">${currentProds.map(p => `<span class="product-dot active" title="${LOB_LABELS[p]||p}">${p.slice(0,3)}</span>`).join('')}${currentProds.length===0?'<span style="color:#555;font-size:12px;">None</span>':''}</div></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ` : '';
+
+    document.getElementById('btnExportFiltered')?.addEventListener('click', () => {
+      exportAccountList(filtered, 'accounts-without-' + primaryLob.toLowerCase().replace(/\s+/g,'-') + '.csv', true);
+    });
+    document.getElementById('btnExportXlsx')?.addEventListener('click', () => {
+      exportAccountListXlsx(filtered, 'accounts-without-' + primaryLob.toLowerCase().replace(/\s+/g,'-') + '.xlsx');
+    });
+  }
+
+  lobSelect.addEventListener('change', () => { updateAdditionalLobs(); updateResults(); });
+  statusSelect.addEventListener('change', updateResults);
+  minEmpSelect.addEventListener('change', updateResults);
+  updateAdditionalLobs();
+}
+
+// ============================================================
+// ALL ACCOUNTS TAB
+// ============================================================
+function renderAccounts(rows) {
+  const tc = document.getElementById('tabContent');
+  let filtered = [...rows];
+  let searchTerm = '';
+  let statusFilter = 'all';
+  let sizeFilter = 'all';
+  let sortCol = 'employeeCount';
+  let sortDir = -1;
+  let lastFilteredResult = [];
+
+  function render() {
+    let result = filtered;
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      result = result.filter(r =>
+        String(getVal(r,'accountName')).toLowerCase().includes(q) ||
+        String(getVal(r,'city')).toLowerCase().includes(q) ||
+        String(getVal(r,'broker')).toLowerCase().includes(q) ||
+        String(getVal(r,'industry')).toLowerCase().includes(q)
+      );
+    }
+    if (statusFilter !== 'all') result = result.filter(r => String(getVal(r,'accountStatus')).toUpperCase() === statusFilter);
+    if (sizeFilter !== 'all') result = result.filter(r => String(getVal(r,'accountSize')).trim() === sizeFilter);
+
+    result.sort((a,b) => {
+      const av = getNum(a, sortCol);
+      const bv = getNum(b, sortCol);
+      return (bv - av) * sortDir;
+    });
+
+    lastFilteredResult = result;
+    const display = result.slice(0, 100);
+
+    document.getElementById('accountCount').textContent = `${result.length.toLocaleString()} accounts`;
+    const tbody = document.getElementById('accountsBody');
+    tbody.innerHTML = display.map(r => {
+      const emps = getNum(r,'employeeCount');
+      const phs = getNum(r,'policyholders');
+      const pen = getNum(r,'penetration');
+      const status = String(getVal(r,'accountStatus')).toUpperCase();
+      const statusClass = status==='A' ? 'tag-green' : status==='P' ? 'tag-yellow' : 'tag-red';
+      const lobCt = LOB_KEYS.reduce((s,l) => s + (getLOB(r,l)>0?1:0), 0);
+      const penColor = pen >= 60 ? '#0BDA51' : pen >= 30 ? '#ffc107' : '#f44336';
+      return `<tr>
+        <td style="color:#fff;font-weight:500;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${getVal(r,'accountName')}</td>
+        <td>${emps.toLocaleString()}</td>
+        <td>${phs.toLocaleString()}</td>
+        <td><span class="pen-bar"><span class="pen-bar-fill" style="width:${Math.min(pen,100)}%;background:${penColor}"></span></span>${pen.toFixed(0)}%</td>
+        <td>${lobCt}</td>
+        <td>${getVal(r,'industry') || '-'}</td>
+        <td>${[getVal(r,'city'),getVal(r,'state')].filter(Boolean).join(', ') || '-'}</td>
+        <td><span class="tag ${statusClass}">${status}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Get unique sizes
+  const sizes = [...new Set(rows.map(r => String(getVal(r,'accountSize')).trim()))].filter(Boolean).sort();
+
+  tc.innerHTML = `
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search accounts, cities, brokers, industries..." />
+      <select id="statusSelect">
+        <option value="all">All Status</option>
+        <option value="A">Active</option>
+        <option value="P">Pending</option>
+        <option value="D">Declined</option>
+      </select>
+      <select id="sizeSelect">
+        <option value="all">All Sizes</option>
+        ${sizes.map(s => `<option value="${s}">${s}</option>`).join('')}
+      </select>
+      <span id="accountCount" style="color:#888;font-size:13px;align-self:center;"></span>
+      <button class="btn-export-sm" id="btnExportVisible">Export Filtered List</button>
+    </div>
+    <div class="table-panel">
+      <div class="scroll-table" style="max-height:600px;">
+        <table>
+          <thead><tr>
+            <th>Account Name</th><th style="cursor:pointer" id="sortEmp">Employees ▼</th><th>Policyholders</th><th>Penetration</th><th>LOBs</th><th>Industry</th><th>Location</th><th>Status</th>
+          </tr></thead>
+          <tbody id="accountsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('searchInput').addEventListener('input', e => { searchTerm = e.target.value; render(); });
+  document.getElementById('statusSelect').addEventListener('change', e => { statusFilter = e.target.value; render(); });
+  document.getElementById('sizeSelect').addEventListener('change', e => { sizeFilter = e.target.value; render(); });
+  document.getElementById('sortEmp').addEventListener('click', () => { sortDir *= -1; render(); });
+  document.getElementById('btnExportVisible').addEventListener('click', () => {
+    exportAccountList(lastFilteredResult, 'filtered-accounts.csv', true);
+  });
+
+  render();
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function exportSummary() {
+  if (!parsedData) return;
+  const { rows } = parsedData;
+  const total = rows.length;
+  const active = rows.filter(r => String(getVal(r,'accountStatus')).toUpperCase() === 'A').length;
+  const totalEmp = rows.reduce((s,r) => s + getNum(r,'employeeCount'), 0);
+  const totalPH = rows.reduce((s,r) => s + getNum(r,'policyholders'), 0);
+
+  let csv = 'Metric,Value\n';
+  csv += `Total Accounts,${total}\n`;
+  csv += `Active Accounts,${active}\n`;
+  csv += `Total Employees,${totalEmp}\n`;
+  csv += `Total Policyholders,${totalPH}\n\n`;
+  csv += 'Product,Accounts,Penetration %\n';
+  LOB_KEYS.forEach(lob => {
+    if (!parsedData.colMap.lobs[lob]) return;
+    const ct = rows.filter(r => getLOB(r,lob)>0).length;
+    csv += `${LOB_LABELS[lob]||lob},${ct},${(ct/total*100).toFixed(1)}\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'book-analysis-summary.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Export account list as CSV with contact info
+function exportAccountList(accounts, filename, includeProducts) {
+  if (!accounts.length) return;
+
+  const csvEscape = (val) => {
+    const s = String(val == null ? '' : val).trim();
+    if (s.includes(',') || s.includes('"') || s.includes('\n')) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  };
+
+  const headers = ['Account Name','Account Number','Employees','Policyholders','Penetration %','Account Status','Industry','Decision Maker','Phone','Email','Address','City','State','Zip','County','Broker'];
+  if (includeProducts) {
+    LOB_KEYS.forEach(l => { if (parsedData.colMap.lobs[l]) headers.push(LOB_LABELS[l] || l); });
+    headers.push('Total LOBs');
+  }
+
+  let csv = headers.map(csvEscape).join(',') + '\n';
+  accounts.forEach(r => {
+    const row = [
+      getVal(r,'accountName'),
+      getVal(r,'accountNumber'),
+      getNum(r,'employeeCount'),
+      getNum(r,'policyholders'),
+      getNum(r,'penetration'),
+      getVal(r,'accountStatus'),
+      getVal(r,'industry'),
+      getVal(r,'decisionMaker'),
+      getVal(r,'phone'),
+      getVal(r,'email'),
+      getVal(r,'zip') ? '' : '', // placeholder for address (not in colMap currently)
+      getVal(r,'city'),
+      getVal(r,'state'),
+      getVal(r,'zip'),
+      getVal(r,'county'),
+      getVal(r,'broker'),
+    ];
+    if (includeProducts) {
+      let lobCt = 0;
+      LOB_KEYS.forEach(l => {
+        if (parsedData.colMap.lobs[l]) {
+          const v = getLOB(r, l);
+          row.push(v);
+          if (v > 0) lobCt++;
+        }
+      });
+      row.push(lobCt);
+    }
+    csv += row.map(csvEscape).join(',') + '\n';
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Export as Excel using SheetJS
+function exportAccountListXlsx(accounts, filename) {
+  if (!accounts.length) return;
+
+  const headers = ['Account Name','Account Number','Employees','Policyholders','Penetration %','Account Status','Industry','Decision Maker','Phone','Email','City','State','Zip','County','Broker'];
+  LOB_KEYS.forEach(l => { if (parsedData.colMap.lobs[l]) headers.push(LOB_LABELS[l] || l); });
+  headers.push('Total LOBs');
+
+  const data = [headers];
+  accounts.forEach(r => {
+    const row = [
+      getVal(r,'accountName'),
+      getVal(r,'accountNumber'),
+      getNum(r,'employeeCount'),
+      getNum(r,'policyholders'),
+      getNum(r,'penetration'),
+      getVal(r,'accountStatus'),
+      getVal(r,'industry'),
+      getVal(r,'decisionMaker'),
+      getVal(r,'phone'),
+      getVal(r,'email'),
+      getVal(r,'city'),
+      getVal(r,'state'),
+      getVal(r,'zip'),
+      getVal(r,'county'),
+      getVal(r,'broker'),
+    ];
+    let lobCt = 0;
+    LOB_KEYS.forEach(l => {
+      if (parsedData.colMap.lobs[l]) {
+        const v = getLOB(r, l);
+        row.push(v);
+        if (v > 0) lobCt++;
+      }
+    });
+    row.push(lobCt);
+    data.push(row);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  // Set column widths
+  ws['!cols'] = headers.map((h,i) => ({ wch: i === 0 ? 35 : i === 7 ? 25 : 15 }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Accounts');
+  XLSX.writeFile(wb, filename);
+}
+
+// ============================================================
+// CHART HELPERS
+// ============================================================
+function chartOpts(yLabel, isHorizontal) {
+  return {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#888', font: { size: 11 } }, grid: { color: '#222' } },
+      y: { ticks: { color: '#888', callback: isHorizontal ? (v => v+'%') : undefined }, grid: { color: '#222' }, title: { display: !!yLabel, text: yLabel, color: '#666' } }
+    }
+  };
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderUpload();
+</script>
+</body>
+</html>
