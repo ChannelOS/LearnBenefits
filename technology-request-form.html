@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Technology Request Form — Channel One Strategies</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface-2: #1a1a1a;
+      --border: #333;
+      --green: #0BDA51;
+      --green-dim: rgba(11, 218, 81, 0.12);
+      --text: #ffffff;
+      --text-secondary: #aaaaaa;
+      --text-label: #dddddd;
+      --radius: 8px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+      line-height: 1.5;
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 620px;
+    }
+
+    .form-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .form-header .logo {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    .form-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+
+    .form-header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .form-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 32px;
+      border: 1px solid #1a1a1a;
+    }
+
+    .section-divider {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 20px;
+    }
+
+    .section-divider:not(:first-of-type) {
+      margin-top: 12px;
+    }
+
+    .section-divider h2 {
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .field-row .field {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .field-row-3 {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .field-row-3 .field {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      color: var(--text-label);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    label .req {
+      color: var(--green);
+      margin-left: 2px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--surface-2);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--green);
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #555;
+    }
+
+    input[type="date"] {
+      color-scheme: dark;
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    select option {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .address-group input {
+      margin-bottom: 8px;
+    }
+
+    .address-group input:last-child {
+      margin-bottom: 0;
+    }
+
+    .address-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .address-row input:nth-child(1) { flex: 2; }
+    .address-row input:nth-child(2) { flex: 1; }
+    .address-row input:nth-child(3) { flex: 1; }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px 0;
+      background: var(--green);
+      color: #000;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 8px;
+    }
+
+    .submit-btn:hover {
+      opacity: 0.9;
+    }
+
+    .submit-btn:active {
+      transform: scale(0.99);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .footer a {
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    /* Success state */
+    .success-screen {
+      text-align: center;
+      padding: 48px 24px;
+    }
+
+    .success-screen .checkmark {
+      font-size: 56px;
+      color: var(--green);
+      margin-bottom: 16px;
+    }
+
+    .success-screen h2 {
+      color: var(--green);
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .success-screen p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .success-screen .done-btn {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 12px 40px;
+      background: var(--green);
+      color: #000;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 520px) {
+      .field-row, .field-row-3, .address-row {
+        flex-direction: column;
+      }
+      .form-card {
+        padding: 24px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="form-header">
+      <div class="logo">CHANNEL ONE STRATEGIES</div>
+      <h1>TECHNOLOGY REQUEST FORM</h1>
+      <p>Complete the form below and we'll get you a quote within 24–48 hours.</p>
+    </div>
+
+    <div class="form-card" id="formCard">
+      <!-- ===================== FORM ===================== -->
+      <!--
+        SETUP INSTRUCTIONS:
+        1. Go to https://formspree.io and sign up (free tier = 50 submissions/month)
+        2. Create a new form — it will give you an endpoint like: https://formspree.io/f/xABCDEFG
+        3. Replace xbdpvzqk below with your actual form ID (just the part after /f/)
+        4. Formspree will email submissions to the email you signed up with
+      -->
+      <form id="techForm" action="https://formspree.io/f/xbdpvzqk" method="POST">
+        <!-- Hidden field to set reply-to -->
+        <input type="hidden" name="_subject" value="New Technology Request Form Submission" />
+
+        <!-- COMPANY INFO -->
+        <div class="section-divider">
+          <h2>Company Info</h2>
+        </div>
+
+        <div class="field">
+          <label>Company Name <span class="req">*</span></label>
+          <input type="text" name="company_name" required />
+        </div>
+
+        <div class="field">
+          <label>Number of W2 Employees <span class="req">*</span></label>
+          <input type="text" name="employee_count" required />
+        </div>
+
+        <div class="field-row-3">
+          <div class="field">
+            <label>Effective Date</label>
+            <input type="date" name="effective_date" />
+          </div>
+          <div class="field">
+            <label>Enrollment Start Date</label>
+            <input type="date" name="enrollment_start_date" />
+          </div>
+          <div class="field">
+            <label>Enrollment End Date</label>
+            <input type="date" name="enrollment_end_date" />
+          </div>
+        </div>
+
+        <div class="field address-group">
+          <label>Company Address <span class="req">*</span></label>
+          <input type="text" name="street_address" required placeholder="Street Address" />
+          <input type="text" name="street_address_2" placeholder="Street Address Line 2" />
+          <div class="address-row">
+            <input type="text" name="city" placeholder="City" />
+            <input type="text" name="state" placeholder="State" />
+            <input type="text" name="zip" placeholder="Zip Code" />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Current Platform / Payroll System</label>
+            <input type="text" name="current_platform" />
+          </div>
+          <div class="field">
+            <label>Broker / Consultant</label>
+            <input type="text" name="broker" />
+          </div>
+        </div>
+
+        <!-- REQUESTER INFO -->
+        <div class="section-divider">
+          <h2>Requester Info</h2>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>First Name <span class="req">*</span></label>
+            <input type="text" name="requester_first_name" required />
+          </div>
+          <div class="field">
+            <label>Last Name <span class="req">*</span></label>
+            <input type="text" name="requester_last_name" required />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Email <span class="req">*</span></label>
+            <input type="email" name="requester_email" required placeholder="example@example.com" />
+          </div>
+          <div class="field">
+            <label>Phone</label>
+            <input type="tel" name="requester_phone" placeholder="(000) 000-0000" />
+          </div>
+        </div>
+
+        <!-- Formspree will use this as the reply-to address -->
+        <input type="hidden" name="_replyto" id="replyToField" />
+
+        <div class="field" style="margin-top:4px;">
+          <label>Message</label>
+          <textarea name="message" rows="4" placeholder="Any additional details, custom plan requests, or special requirements..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Submit Quote Request</button>
+      </form>
+
+      <!-- ===================== SUCCESS ===================== -->
+      <div class="success-screen" id="successScreen" style="display:none;">
+        <div class="checkmark">&#10003;</div>
+        <h2>Quote Request Submitted!</h2>
+        <p>We'll review your requirements and get back to you within 24–48 hours.</p>
+        <p>A confirmation will be sent to your email with next steps.</p>
+        <a href="javascript:void(0)" class="done-btn" onclick="resetForm()">Submit Another</a>
+      </div>
+    </div>
+
+    <div class="footer">
+      &copy; 2026 <a href="https://channelonestrategies.com" target="_blank">Channel One Strategies</a>. All rights reserved.
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('techForm');
+    const successScreen = document.getElementById('successScreen');
+    const submitBtn = document.getElementById('submitBtn');
+    const replyToField = document.getElementById('replyToField');
+
+    // Sync reply-to with requester email
+    const emailInput = document.querySelector('input[name="requester_email"]');
+    emailInput.addEventListener('input', function() {
+      replyToField.value = this.value;
+    });
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      try {
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          form.style.display = 'none';
+          successScreen.style.display = 'block';
+        } else {
+          alert('Something went wrong. Please try again or contact us directly.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit Quote Request';
+        }
+      } catch (err) {
+        alert('Network error. Please check your connection and try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Quote Request';
+      }
+    });
+
+    function resetForm() {
+      form.reset();
+      form.style.display = 'block';
+      successScreen.style.display = 'none';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Quote Request';
+    }
+  </script>
+</body>
+</html>
